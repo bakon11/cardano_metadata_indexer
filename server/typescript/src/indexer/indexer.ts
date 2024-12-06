@@ -4,7 +4,11 @@ import { open } from 'sqlite';
 
 console.log("web socket: ", process.env.OGMIOS_WS);
 const indexerdb = "./src/indexer/indexer.db";
-const client = new WebSocket(process.env.OGMIOS_WS as string );
+try{
+  const client = new WebSocket(process.env.OGMIOS_WS as string);
+}catch(error){
+  console.error("Error connecting to wsprpc", error);
+};
 const network = process.env.NETWORK;
 
 export const runIndexer = async () => {
