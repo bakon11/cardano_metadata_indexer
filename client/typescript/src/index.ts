@@ -5,13 +5,17 @@ import _ from "lodash";
 import { OpenrpcDocument as OpenRPC, MethodObject, ContentDescriptorObject } from "@open-rpc/meta-schema";
 import { MethodCallValidator, MethodNotFoundError } from "@open-rpc/schema-utils-js";
 
+export type PolicyId = string;
+export type AssetName = string;
+export type StringDoaGddGA = string;
 /**
  *
  * Generated! Represents an alias to any of the provided schemas
  *
  */
-export type AnyOf = ;
-
+export type AnyOfPolicyIdPolicyIdAssetNameStringDoaGddGAStringDoaGddGA = PolicyId | AssetName | StringDoaGddGA;
+export type GetByPolicyId = (policy_id: PolicyId) => Promise<StringDoaGddGA>;
+export type GetByPolicyIdAndAssetName = (policy_id: PolicyId, asset_name: AssetName) => Promise<StringDoaGddGA>;
 
 export interface Options {
   transport: {
@@ -23,9 +27,9 @@ export interface Options {
   },
 }
 
-export class  {
+export class CardanoMetadataIndexer {
   public rpc: Client;
-  public static openrpcDocument: OpenRPC = {"openrpc":"1.2.4","info":{"title":"","version":"1.0.0"},"methods":[]} ;
+  public static openrpcDocument: OpenRPC = {"openrpc":"1.2.6","info":{"title":"cardano_metadata_indexer","version":"1.0.0","description":"This is a simple light weight metadata indexer for Cardano."},"methods":[{"name":"get_by_policy_id","description":"","params":[{"name":"policy_id","description":"Assets policy id","required":true,"schema":{"title":"policy_id","type":"string"}}],"result":{"name":"result","description":"","schema":{"type":"string"}}},{"name":"get_by_policy_id_and_asset_name","description":"","params":[{"name":"policy_id","description":"Assets policy id","required":true,"schema":{"title":"policy_id","type":"string"}},{"name":"asset_name","description":"Assets name","required":true,"schema":{"title":"asset_name","type":"string"}}],"result":{"name":"result","description":"","schema":{"type":"string"}}}],"components":{"contentDescriptors":{"policy_id":{"name":"policy_id","description":"Assets policy id","required":true,"schema":{"title":"policy_id","type":"string"}},"asset_name":{"name":"asset_name","description":"Assets name","required":true,"schema":{"title":"asset_name","type":"string"}}}}} ;
   public transport: HTTPTransport | WebSocketTransport | PostMessageWindowTransport | PostMessageIframeTransport;
   private validator: MethodCallValidator;
   private timeout: number | undefined;
@@ -59,7 +63,7 @@ export class  {
         break;
     }
     this.rpc = new Client(new RequestManager([this.transport]));
-    this.validator = new MethodCallValidator(.openrpcDocument);
+    this.validator = new MethodCallValidator(CardanoMetadataIndexer.openrpcDocument);
   }
   /**
    * Adds a JSONRPC notification handler to handle receiving notifications.
@@ -92,10 +96,10 @@ export class  {
   }
 
   /**
-   * Initiates [[.startBatch]] in order to build a batch call.
+   * Initiates [[CardanoMetadataIndexer.startBatch]] in order to build a batch call.
    *
-   * Subsequent calls to [[.request]] will be added to the batch.
-   * Once [[.stopBatch]] is called, the promises for the [[.request]]
+   * Subsequent calls to [[CardanoMetadataIndexer.request]] will be added to the batch.
+   * Once [[CardanoMetadataIndexer.stopBatch]] is called, the promises for the [[CardanoMetadataIndexer.request]]
    * will then be resolved.  If there is already a batch in progress this method is a noop.
    *
    * @example
@@ -111,8 +115,8 @@ export class  {
   /**
    * Initiates [[Client.stopBatch]] in order to finalize and send the batch to the underlying transport.
    *
-   * stopBatch will send the [[]] calls made since the last [[.startBatch]] call. For
-   * that reason, [[.startBatch]] MUST be called before [[.stopBatch]].
+   * stopBatch will send the [[CardanoMetadataIndexer]] calls made since the last [[CardanoMetadataIndexer.startBatch]] call. For
+   * that reason, [[CardanoMetadataIndexer.startBatch]] MUST be called before [[CardanoMetadataIndexer.stopBatch]].
    *
    * @example
    * myClient.startBatch();
@@ -125,7 +129,7 @@ export class  {
   }
 
   private request(methodName: string, params: any[]): Promise<any> {
-    const methodObject = _.find((.openrpcDocument.methods as MethodObject[]), ({name}) => name === methodName) as MethodObject;
+    const methodObject = _.find((CardanoMetadataIndexer.openrpcDocument.methods as MethodObject[]), ({name}) => name === methodName) as MethodObject;
     const notification = methodObject.result ? false : true;
     const openRpcMethodValidationErrors = this.validator.validate(methodName, params);
     if ( openRpcMethodValidationErrors instanceof MethodNotFoundError || openRpcMethodValidationErrors.length > 0) {
@@ -145,5 +149,21 @@ export class  {
   }
 
   
+  /**
+   * 
+   */
+  // tslint:disable-next-line:max-line-length
+  public get_by_policy_id: GetByPolicyId = (...params) => {
+    return this.request("get_by_policy_id", params);
+  }
+  
+  /**
+   * 
+   */
+  // tslint:disable-next-line:max-line-length
+  public get_by_policy_id_and_asset_name: GetByPolicyIdAndAssetName = (...params) => {
+    return this.request("get_by_policy_id_and_asset_name", params);
+  }
+  
 }
-export default ;
+export default CardanoMetadataIndexer;

@@ -1,8 +1,67 @@
 {
-  "openrpc": "1.2.4",
+  "openrpc": "1.2.6",
   "info": {
-    "title": "",
-    "version": "1.0.0"
+    "title": "cardano_metadata_indexer",
+    "version": "1.0.0",
+    "description": "This is a simple light weight metadata indexer for Cardano."
   },
-  "methods": []
+  "methods": [
+    {
+      "name": "get_by_policy_id",
+      "description": "",
+      "params": [
+        {
+          "$ref": "#/components/contentDescriptors/policy_id"
+        }
+      ],
+      "result": {
+        "name": "result",
+        "description": "",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "get_by_policy_id_and_asset_name",
+      "description": "",
+      "params": [
+        {
+          "$ref": "#/components/contentDescriptors/policy_id"
+        },
+        {
+          "$ref": "#/components/contentDescriptors/asset_name"
+        }
+      ],
+      "result": {
+        "name": "result",
+        "description": "",
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  ],
+  "components": {
+    "contentDescriptors": {
+      "policy_id": {
+        "name": "policy_id",
+        "description": "Assets policy id",
+        "required": true,
+        "schema": {
+          "title": "policy_id",
+          "type": "string"
+        }
+      },
+      "asset_name": {
+        "name": "asset_name",
+        "description": "Assets name",
+        "required": true,
+        "schema": {
+          "title": "asset_name",
+          "type": "string"
+        }
+      }
+    }
+  }
 }

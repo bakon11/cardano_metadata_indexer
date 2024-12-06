@@ -23,5 +23,12 @@ Specifying your own starting point using `slot` and `block hash`.
 
 And if you know a little bit of typescript you can also customize it and specify which policy numbers to index, in the future this will be in a config file.
 
+Then run `npm run indexer` from the `server/typescript` directory will start the indexer.
 
+Then run `npm start` to start the JSON-RPC2.0 api server.(Note: read `Whats left` section).
 
+**Whats Left**
+config file for easier confiugring of the indexer.
+
+**client**
+The client folder is a installable api client for react.

@@ -28,6 +28,9 @@
       "params": [
         {
           "$ref": "#/components/contentDescriptors/policy_id"
+        },
+        {
+          "$ref": "#/components/contentDescriptors/asset_name"
         }
       ],
       "result": {

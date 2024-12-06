@@ -4,6 +4,8 @@ import { MethodMapping } from "@open-rpc/server-js/build/router";
 import methods from "./methods";
 
 export const methodMapping: MethodMapping = {
+  get_by_policy_id: methods.get_by_policy_id,
+  get_by_policy_id_and_asset_name: methods.get_by_policy_id_and_asset_name,
 };
 
 export default methodMapping;
