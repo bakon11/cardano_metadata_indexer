@@ -42,6 +42,10 @@ export const runIndexer = async () => {
     intersectionPoints.length === 0 && wsprpc("findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : network === "mainnet" ? defaultIntersectPointsMainnet : defaultIntersectPointsPreprod }, "find-intersection");
   });
   
+  client.on('open', function open() {
+    console.log("Ws connection open");
+  });
+
   client.on('message', async ( msg: any ) => {
     const response = JSON.parse(msg);
     // console.log("response on message:", response);
