@@ -14,7 +14,7 @@ export async function start() {
       {
         type: "HTTPTransport",
         options: {
-          port: process.env.HTTP_PORT ? parseInt(process.env.SERVER_HTTP_PORT as string, 10) : 4441,
+          port: process.env.SERVER_HTTP_PORT ? parseInt(process.env.SERVER_HTTP_PORT as string, 10) : 4441,
           middleware: [],
         } as HTTPServerTransportOptions,
       },
