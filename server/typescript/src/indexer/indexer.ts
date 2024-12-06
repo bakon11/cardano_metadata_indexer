@@ -3,7 +3,7 @@ import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 
 const indexerdb = "./src/indexer/indexer.db";
-console.log("indexerdb: ", indexerdb);
+// console.log("indexerdb: ", indexerdb);
 
 console.log("web socket: ", process.env.OGMIOS_WS);
 const ws = new WebSocket( process.env.OGMIOS_WS as string, {
