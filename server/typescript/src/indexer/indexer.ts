@@ -75,7 +75,7 @@ export const runIndexer = async () => {
   });
 
   client.on('error', (error) => {
-    console.error("Connection Error: ", error);
+    console.log("Connection Error: ", error);
   });
 };
 
