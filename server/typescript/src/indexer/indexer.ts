@@ -15,6 +15,11 @@ ws.on('message', async ( msg: any ) => {
   const response = JSON.parse(msg);
 });
 
+ws.once('open', () => {
+  console.log("Websocket connected to OGMIOS");
+  runIndexer();
+});
+
 const runIndexer = async () => {
   console.log("Checking for tables");
   await createTable();
