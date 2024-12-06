@@ -2,20 +2,20 @@ import WebSocket from 'ws';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 
-console.log("web socker: ", process.env.OGMIOS_WS);
+console.log("web socket: ", process.env.OGMIOS_WS);
 const indexerdb = "./src/indexer/indexer.db";
 const client = new WebSocket(process.env.OGMIOS_WS as string );
-const network = "preprod";
+const network = process.env.NETWORK;
 
 export const runIndexer = async () => {
+  console.log("Checking for tables");
   await createTable();
-
   const intersectionPoints = await getLastIntersectPoints();
   
   //Last Shelley block mainnet
   const defaultIntersectPointsMainnet = [{
-    slot: 16588737,
-    id: "4e9bbbb67e3ae262133d94c3da5bffce7b1127fc436e7433b87668dba34c354a"
+    slot: process.env.SLOT,
+    id: process.env.BLOCK_HASH
   }];
   // Last Shelley blockPreprod
   const defaultIntersectPointsPreprod = [{
@@ -23,15 +23,16 @@ export const runIndexer = async () => {
     id: "f9d8b6c77fedd60c3caf5de0ce63a0aeb9d1753269c9c07503d9aa09d5144481"
   }];
   const customIntersectPoints = [{
-    slot: process.env.SLOT,
+    slot: parseInt(process.env.SLOT as string, 10),
     id: process.env.BLOCK_HASH
   }];
   console.log("Last Intersection Points: ", intersectionPoints);
+  console.log("use custom: ",  process.env.USECUSTOM);
 
   client.once('open', () => {
     console.log("connected to wsprpc");
-    intersectionPoints.length > 0 && wsprpc("findIntersection", { points: intersectionPoints }, "find-intersection");
-    intersectionPoints.length === 0 && wsprpc("findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : defaultIntersectPointsMainnet }, "find-intersection");
+    intersectionPoints.length > 0 && wsprpc("findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : intersectionPoints }, "find-intersection");
+    intersectionPoints.length === 0 && wsprpc("findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : network === "mainnet" ? defaultIntersectPointsMainnet : defaultIntersectPointsPreprod }, "find-intersection");
   });
   
   client.on('message', async ( msg: any ) => {
