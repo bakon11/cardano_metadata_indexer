@@ -11,28 +11,7 @@ const ws = new WebSocket( process.env.OGMIOS_WS as string);
 const network = process.env.NETWORK;
 console.log("network: ", network);
 
-ws.on('message', async ( msg: any ) => {
-  const response = JSON.parse(msg);
-  // console.log("response on message:", response);
-
-  if (response.id === "find-intersection") {
-      if (response.error) { throw "Whoops? Last Byron block disappeared?" };
-      wsprpc("nextBlock", {}, "nextBlock");
-  };
-  
-  if (response.result.direction === "forward") {
-    console.log("Processing slot: ", response.result.block.slot + " of " + response.result.tip.slot);
-    await saveMetadata(response.result.block);
-    wsprpc("nextBlock", {}, response.id);
-  };
-
-  if (response.result.direction === "backward") {
-    // console.log(response.result.block);
-    wsprpc("nextBlock", {}, response.id);
-  };
-});
-
-export const runIndexer = async () => {
+const runIndexer = async () => {
   console.log("Checking for tables");
   await createTable();
   const intersectionPoints = await getLastIntersectPoints();
@@ -70,6 +49,27 @@ export const runIndexer = async () => {
 
   ws.on('error', (error) => {
     console.log("Connection Error: ", error);
+  });
+
+  ws.on('message', async ( msg: any ) => {
+    const response = JSON.parse(msg);
+    // console.log("response on message:", response);
+
+    if (response.id === "find-intersection") {
+        if (response.error) { throw "Whoops? Last Byron block disappeared?" };
+        wsprpc("nextBlock", {}, "nextBlock");
+    };
+    
+    if (response.result.direction === "forward") {
+      console.log("Processing slot: ", response.result.block.slot + " of " + response.result.tip.slot);
+      await saveMetadata(response.result.block);
+      wsprpc("nextBlock", {}, response.id);
+    };
+
+    if (response.result.direction === "backward") {
+      // console.log(response.result.block);
+      wsprpc("nextBlock", {}, response.id);
+    };
   });
 
 };
