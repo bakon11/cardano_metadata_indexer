@@ -19,8 +19,8 @@ export const runIndexer = async () => {
   
   //Last Shelley block mainnet
   const defaultIntersectPointsMainnet = [{
-    slot: process.env.SLOT,
-    id: process.env.BLOCK_HASH
+    slot: 16588737,
+    id: "4e9bbbb67e3ae262133d94c3da5bffce7b1127fc436e7433b87668dba34c354a"
   }];
   // Last Shelley blockPreprod
   const defaultIntersectPointsPreprod = [{
