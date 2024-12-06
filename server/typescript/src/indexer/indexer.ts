@@ -152,4 +152,4 @@ const connectDB = async () => {
   };
 };
 
-// runIndexer();
+runIndexer();
