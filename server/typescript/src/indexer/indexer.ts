@@ -5,8 +5,8 @@ import { open } from 'sqlite';
 const indexerdb = "./src/indexer/indexer.db";
 console.log("indexerdb: ", indexerdb);
 
-console.log("web socket: ", process.env.OGMIOS_WS);
-const client = new WebSocket(process.env.OGMIOS_WS as string, {
+// console.log("web socket: ", process.env.OGMIOS_WS);
+const client = new WebSocket("192.168.8.3:1337", {
   rejectUnauthorized: false  // This bypasses certificate validation
 });
 console.log("client: ", client);
@@ -36,14 +36,14 @@ export const runIndexer = async () => {
   console.log("Last Intersection Points: ", intersectionPoints);
   console.log("use custom: ",  process.env.USECUSTOM);
 
+  client.on('open', function open() {
+    console.log("Ws connection open");
+  });
+
   client.once('open', () => {
     console.log("connected to wsprpc");
     intersectionPoints.length > 0 && wsprpc("findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : intersectionPoints }, "find-intersection");
     intersectionPoints.length === 0 && wsprpc("findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : network === "mainnet" ? defaultIntersectPointsMainnet : defaultIntersectPointsPreprod }, "find-intersection");
-  });
-  
-  client.on('open', function open() {
-    console.log("Ws connection open");
   });
 
   client.on('message', async ( msg: any ) => {
