@@ -13,7 +13,13 @@ const ws = new WebSocket( process.env.OGMIOS_WS as string, {
 const network = process.env.NETWORK;
 console.log("network: ", network);
 
-
+ws.once('open', () => {
+  console.log("Websocket connected to OGMIOS starting sync");
+  wsprpc("findIntersection", { points: [{
+    slot: 16588737,
+    id: "4e9bbbb67e3ae262133d94c3da5bffce7b1127fc436e7433b87668dba34c354a"
+  }]}, "find-intersection");
+});
 export const runIndexer = async () => {
   const ws = new WebSocket( process.env.OGMIOS_WS as string, {
     perMessageDeflate: false
