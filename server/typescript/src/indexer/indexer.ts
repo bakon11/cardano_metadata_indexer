@@ -7,16 +7,38 @@ console.log("indexerdb: ", indexerdb);
 const network = process.env.NETWORK;
 console.log("network: ", network);
 
+console.log("web socket: ", process.env.OGMIOS_WS);
+const ws = new WebSocket( process.env.OGMIOS_WS as string);
+
+ws.on('message', async ( msg: any ) => {
+  const response = JSON.parse(msg);
+  // console.log("response on message:", response);
+
+  if (response.id === "find-intersection") {
+    if (response.error) { throw "Whoops? Last Byron block disappeared?" };
+    wsprpc(ws, "nextBlock", {}, "nextBlock");
+  };
+  
+  if (response.result.direction === "forward") {
+    console.log("Processing slot: ", response.result.block.slot + " of " + response.result.tip.slot);
+    await saveMetadata(response.result.block);
+    wsprpc(ws, "nextBlock", {}, response.id);
+  };
+
+  if (response.result.direction === "backward") {
+    // console.log(response.result.block);
+    wsprpc(ws, "nextBlock", {}, response.id);
+  };
+});
 
 const indexer = async () => {
 
-  console.log("web socket: ", process.env.OGMIOS_WS);
-  const ws = new WebSocket( process.env.OGMIOS_WS as string);
-
   console.log("Checking for tables");
   await createTable();
-  const intersectionPoints = await getLastIntersectPoints();
   
+  const intersectionPoints = await getLastIntersectPoints();
+  console.log("Last Intersection Points: ", intersectionPoints);
+
   //Last Shelley block mainnet
   const defaultIntersectPointsMainnet = [{
     slot: 16588737,
@@ -32,21 +54,10 @@ const indexer = async () => {
     id: process.env.BLOCK_HASH
   }];
 
-  console.log("Last Intersection Points: ", intersectionPoints);
-  console.log("use custom: ",  process.env.USECUSTOM);
-
   ws.on('open', () => {
     console.log("Websocket connected to OGMIOS starting sync");
     intersectionPoints.length > 0 && wsprpc(ws, "findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : intersectionPoints }, "find-intersection");
     intersectionPoints.length === 0 && wsprpc(ws, "findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : network === "mainnet" ? defaultIntersectPointsMainnet : defaultIntersectPointsPreprod }, "find-intersection");
-  });
-
-  ws.on('close', () => {
-    console.log("Connection closed");
-  });
-
-  ws.on('error', (error: any) => {
-    console.log("Connection Error: ", error);
   });
 
   ws.on('message', async ( msg: any ) => {
@@ -70,6 +81,13 @@ const indexer = async () => {
     };
   });
 
+  ws.on('close', () => {
+    console.log("Connection closed");
+  });
+
+  ws.on('error', (error: any) => {
+    console.log("Connection Error: ", error);
+  });
 };
 
 const wsprpc = ( ws: any, method: string, params:object, id: string | number ) => {
@@ -151,6 +169,7 @@ const connectDB = async () => {
 
 const runIndexer = async () => {
   await indexer();
+  console.log("Indexer started");
 };
 
 runIndexer();
