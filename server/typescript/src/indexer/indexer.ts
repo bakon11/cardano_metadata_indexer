@@ -6,10 +6,10 @@ const indexerdb = "./src/indexer/indexer.db";
 console.log("indexerdb: ", indexerdb);
 
 console.log("web socket: ", process.env.OGMIOS_WS);
-const client = new WebSocket( process.env.OGMIOS_WS as string, {
+const ws = new WebSocket( process.env.OGMIOS_WS as string, {
   perMessageDeflate: false
 });
-console.log("client: ", client);
+console.log("ws: ", ws);
 
 const network = process.env.NETWORK;
 console.log("network: ", network);
@@ -37,25 +37,25 @@ export const runIndexer = async () => {
   console.log("use custom: ",  process.env.USECUSTOM);
 
   
-  client.on('open', () => {
+  ws.on('open', () => {
     console.log("Websocket connected to OGMIOS");
   });
 
-  client.once('open', () => {
+  ws.once('open', () => {
     console.log("Websocket connected to OGMIOS starting sync");
     intersectionPoints.length > 0 && wsprpc("findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : intersectionPoints }, "find-intersection");
     intersectionPoints.length === 0 && wsprpc("findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : network === "mainnet" ? defaultIntersectPointsMainnet : defaultIntersectPointsPreprod }, "find-intersection");
   });
 
-  client.on('close', () => {
+  ws.on('close', () => {
     console.log("Connection closed");
   });
 
-  client.on('error', (error) => {
+  ws.on('error', (error) => {
     console.log("Connection Error: ", error);
   });
 
-  client.on('message', async ( msg: any ) => {
+  ws.on('message', async ( msg: any ) => {
     const response = JSON.parse(msg);
     // console.log("response on message:", response);
 
@@ -82,7 +82,7 @@ export const runIndexer = async () => {
 };
 
 const wsprpc = (method: string, params:object, id: string | number ) => {
-  client.send(JSON.stringify({
+  ws.send(JSON.stringify({
     jsonrpc: "2.0",
     method,
     params,
