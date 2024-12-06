@@ -30,7 +30,7 @@ const runIndexer = async () => {
   client.once('open', () => {
     console.log("connected to wsprpc");
     intersectionPoints.length > 0 && wsprpc("findIntersection", { points: intersectionPoints }, "find-intersection");
-    intersectionPoints.length === 0 && wsprpc("findIntersection", { points: customIntersectPoints }, "find-intersection");
+    intersectionPoints.length === 0 && wsprpc("findIntersection", { points: defaultIntersectPointsMainnet }, "find-intersection");
   });
   
   client.on('message', async ( msg: any ) => {

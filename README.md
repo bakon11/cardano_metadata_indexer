@@ -9,6 +9,19 @@ It also includes a small JSON-RPC2.0 API with two methods to fetch assets, `get_
 **Why does this exist**
 
 I find that for most DApp projects I don't need much more than kupo and ogmios. However using the two you don't have the easiest way to access NFT metadata based on CIP-25.
-Needing another more complex solution like 
+Needing another more complex heavier solution.
 
 This indexer lets you parse and save all metadata from slot of your choosing, it will also pickup last saved slot in case it restarts or crashes.
+
+**How to use it**
+On my todo list is to have a simple config file. 
+
+For right now you can go into `server/typescript/src/indexer.ts` and you'll find the configs at the type.
+
+Update `client` variable at top to your own Ogmios instance.
+Specifying your own starting point using `slot` and `block hash`.
+
+And if you know a little bit of typescript you can also customize it and specify which policy numbers to index, in the future this will be in a config file.
+
+
+
