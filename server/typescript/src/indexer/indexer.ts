@@ -98,7 +98,7 @@ type Block = {
 };
 const saveMetadata = async (block: Block) => {
   const db: any = await connectDB();
-  const SQL = "INSERT INTO metadata ( slot, block_hash, era, policy_id, asset_name, metadata ) VALUES ( ?, ?, ?, ?, ?, ? )";
+  const SQL = `INSERT INTO metadata_${network} ( slot, block_hash, era, policy_id, asset_name, metadata ) VALUES ( ?, ?, ?, ?, ?, ? )`;
   if (block.transactions && block.transactions.length > 0) {
     await Promise.all(block.transactions.map(async (tx: any) => {
       if (tx.metadata && tx.metadata.labels && tx.metadata.labels['721']) {
@@ -126,7 +126,7 @@ const saveMetadata = async (block: Block) => {
 
 const getLastIntersectPoints = async () => {
   const db: any = await connectDB();
-  const SQL = "SELECT slot, block_hash FROM metadata ORDER BY slot DESC LIMIT 100";
+  const SQL = `SELECT slot, block_hash FROM metadata_${network} ORDER BY slot DESC LIMIT 100`;
   const rows = await db.all(SQL);
   await db.close();
 
@@ -140,7 +140,7 @@ const getLastIntersectPoints = async () => {
 
 const createTable = async () => {
   const db: any = await connectDB();
-  const SQL = "CREATE TABLE IF NOT EXISTS metadata ( id INTEGER PRIMARY KEY AUTOINCREMENT, slot INTEGER, block_hash TEXT, era TEXT, policy_id TEXT, asset_name TEXT, metadata TEXT )";
+  const SQL = `CREATE TABLE IF NOT EXISTS metadata_${network} ( id INTEGER PRIMARY KEY AUTOINCREMENT, slot INTEGER, block_hash TEXT, era TEXT, policy_id TEXT, asset_name TEXT, metadata TEXT )`;
   await db.run(SQL);
   await db.close();
 };
