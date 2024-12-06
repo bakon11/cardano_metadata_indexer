@@ -36,14 +36,23 @@ export const runIndexer = async () => {
   console.log("Last Intersection Points: ", intersectionPoints);
   console.log("use custom: ",  process.env.USECUSTOM);
 
-  client.on('open', function open() {
-    console.log("Ws connection open");
+  
+  client.on('open', () => {
+    console.log("Websocket connected to OGMIOS");
   });
 
   client.once('open', () => {
-    console.log("connected to wsprpc");
+    console.log("Websocket connected to OGMIOS starting sync");
     intersectionPoints.length > 0 && wsprpc("findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : intersectionPoints }, "find-intersection");
     intersectionPoints.length === 0 && wsprpc("findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : network === "mainnet" ? defaultIntersectPointsMainnet : defaultIntersectPointsPreprod }, "find-intersection");
+  });
+
+  client.on('close', () => {
+    console.log("Connection closed");
+  });
+
+  client.on('error', (error) => {
+    console.log("Connection Error: ", error);
   });
 
   client.on('message', async ( msg: any ) => {
@@ -66,17 +75,10 @@ export const runIndexer = async () => {
       // console.log(response.result.block);
       wsprpc("nextBlock", {}, response.id);
     };
-
     return(response);
   });
 
-  client.on('close', () => {
-    console.log("Connection closed");
-  });
 
-  client.on('error', (error) => {
-    console.log("Connection Error: ", error);
-  });
 };
 
 const wsprpc = (method: string, params:object, id: string | number ) => {
