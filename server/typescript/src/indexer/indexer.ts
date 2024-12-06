@@ -12,7 +12,7 @@ const network = process.env.NETWORK;
 console.log("network: ", network);
 
 ws.on('message', async ( msg: any ) => {
-  const response = JSON.parse(msg);
+  console.log(JSON.parse(msg));
 });
 
 ws.once('open', () => {
