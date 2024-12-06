@@ -2,14 +2,15 @@ import WebSocket from 'ws';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 
-console.log("web socket: ", process.env.OGMIOS_WS);
 const indexerdb = "./src/indexer/indexer.db";
-try{
-  const client = new WebSocket(process.env.OGMIOS_WS as string);
-}catch(error){
-  console.error("Error connecting to wsprpc", error);
-};
+console.log("indexerdb: ", indexerdb);
+
+console.log("web socket: ", process.env.OGMIOS_WS);
+const client = new WebSocket(process.env.OGMIOS_WS as string);
+console.log("client: ", client);
+
 const network = process.env.NETWORK;
+console.log("network: ", network);
 
 export const runIndexer = async () => {
   console.log("Checking for tables");
