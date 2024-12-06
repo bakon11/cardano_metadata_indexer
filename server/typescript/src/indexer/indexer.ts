@@ -13,34 +13,6 @@ const ws = new WebSocket( process.env.OGMIOS_WS as string, {
 const network = process.env.NETWORK;
 console.log("network: ", network);
 
-ws.once('open', () => {
-  console.log("Websocket connected to OGMIOS starting sync");
-  wsprpc("findIntersection", { points: [{
-    slot: 16588737,
-    id: "4e9bbbb67e3ae262133d94c3da5bffce7b1127fc436e7433b87668dba34c354a"
-  }]}, "find-intersection");
-});
-ws.on('message', async ( msg: any ) => {
-  const response = JSON.parse(msg);
-  // console.log("response on message:", response);
-
-  if (response.id === "find-intersection") {
-      if (response.error) { throw "Whoops? Last Byron block disappeared?" };
-      wsprpc("nextBlock", {}, "nextBlock");
-  };
-  
-  if (response.result.direction === "forward") {
-    console.log("Processing slot: ", response.result.block.slot + " of " + response.result.tip.slot);
-    await saveMetadata(response.result.block);
-    wsprpc("nextBlock", {}, response.id);
-  };
-
-  if (response.result.direction === "backward") {
-    // console.log(response.result.block);
-    wsprpc("nextBlock", {}, response.id);
-  };
-});
-
 export const runIndexer = async () => {
   const ws = new WebSocket( process.env.OGMIOS_WS as string, {
     perMessageDeflate: false
@@ -105,7 +77,6 @@ export const runIndexer = async () => {
       // console.log(response.result.block);
       wsprpc("nextBlock", {}, response.id);
     };
-
   });
 
 
