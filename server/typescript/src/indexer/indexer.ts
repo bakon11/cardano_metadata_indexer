@@ -11,6 +11,10 @@ const ws = new WebSocket( process.env.OGMIOS_WS as string);
 const network = process.env.NETWORK;
 console.log("network: ", network);
 
+ws.on('message', async ( msg: any ) => {
+  const response = JSON.parse(msg);
+});
+
 const runIndexer = async () => {
   console.log("Checking for tables");
   await createTable();
@@ -30,6 +34,7 @@ const runIndexer = async () => {
     slot: parseInt(process.env.SLOT as string, 10),
     id: process.env.BLOCK_HASH
   }];
+
   console.log("Last Intersection Points: ", intersectionPoints);
   console.log("use custom: ",  process.env.USECUSTOM);
 

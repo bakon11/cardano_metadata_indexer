@@ -20,7 +20,7 @@
     "build": "tsc",
     "watch:build": "tsc --watch",
     "watch:test": "jest --watch",
-    "run-indexer": "ts-node src/indexer/indexer.ts"
+    "run-indexer": "ts-node --env-file=.env src/indexer/indexer.ts"
   },
   "author": "",
   "license": "Apache-2.0",
