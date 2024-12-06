@@ -63,6 +63,14 @@ export const runIndexer = async () => {
 
     return(response);
   });
+
+  client.on('close', () => {
+    console.log("Connection closed");
+  });
+
+  client.on('error', (error) => {
+    console.error("Connection Error: ", error);
+  });
 };
 
 const wsprpc = (method: string, params:object, id: string | number ) => {
