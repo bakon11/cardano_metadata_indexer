@@ -8,7 +8,7 @@ const network = process.env.NETWORK;
 console.log("network: ", network);
 
 
-const runIndexer = async () => {
+const indexer = async () => {
 
   console.log("web socket: ", process.env.OGMIOS_WS);
   const ws = new WebSocket( process.env.OGMIOS_WS as string);
@@ -147,6 +147,10 @@ const connectDB = async () => {
     console.error("Error connecting to db", error);
     return;
   };
+};
+
+const runIndexer = async () => {
+  await indexer();
 };
 
 runIndexer();
