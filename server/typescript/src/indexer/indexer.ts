@@ -7,10 +7,12 @@ console.log("indexerdb: ", indexerdb);
 const network = process.env.NETWORK;
 console.log("network: ", network);
 
-console.log("web socket: ", process.env.OGMIOS_WS);
-const ws = new WebSocket( process.env.OGMIOS_WS as string);
 
-const runIndexer = async (ws: any) => {
+const runIndexer = async () => {
+
+  console.log("web socket: ", process.env.OGMIOS_WS);
+  const ws = new WebSocket( process.env.OGMIOS_WS as string);
+
   console.log("Checking for tables");
   await createTable();
   const intersectionPoints = await getLastIntersectPoints();
@@ -147,4 +149,4 @@ const connectDB = async () => {
   };
 };
 
-runIndexer(ws);
+runIndexer();
