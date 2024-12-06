@@ -33,5 +33,7 @@ export async function start() {
   const s = new Server(serverOptions);
 
   s.start();
-  runIndexer();
-}
+  
+};
+
+runIndexer();
