@@ -21,7 +21,7 @@ export async function start() {
       {
         type: "WebSocketTransport",
         options: {
-          port: process.env.WS_PORT || 3331,
+          port: process.env.SERVER_WS_PORT || 3331,
           middleware: [],
         } as WebSocketServerTransportOptions,
       },
