@@ -5,6 +5,7 @@ import { OpenrpcDocument } from "@open-rpc/meta-schema";
 import { parseOpenRPCDocument } from "@open-rpc/schema-utils-js";
 import methodMapping from "./generated-method-mapping";
 import doc from "./openrpc.json";
+import { runIndexer } from "./indexer/indexer";
 
 export async function start() {
   const serverOptions: ServerOptions = {
@@ -32,4 +33,5 @@ export async function start() {
   const s = new Server(serverOptions);
 
   s.start();
+  runIndexer();
 }

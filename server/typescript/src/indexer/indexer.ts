@@ -2,11 +2,12 @@ import WebSocket from 'ws';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 
+console.log("web socker: ", process.env.OGMIOS_WS);
 const indexerdb = "./src/indexer/indexer.db";
 const client = new WebSocket(process.env.OGMIOS_WS as string );
 const network = "preprod";
 
-const runIndexer = async () => {
+export const runIndexer = async () => {
   await createTable();
 
   const intersectionPoints = await getLastIntersectPoints();
@@ -135,4 +136,4 @@ const connectDB = async () => {
   };
 };
 
-runIndexer();
+// runIndexer();
