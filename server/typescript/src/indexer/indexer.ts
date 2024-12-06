@@ -3,7 +3,7 @@ import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 
 const indexerdb = "./src/indexer/indexer.db";
-const client = new WebSocket("ws://192.168.1.247:1337");
+const client = new WebSocket(process.env.OGMIOS_WS as string );
 const network = "preprod";
 
 const runIndexer = async () => {
@@ -22,15 +22,15 @@ const runIndexer = async () => {
     id: "f9d8b6c77fedd60c3caf5de0ce63a0aeb9d1753269c9c07503d9aa09d5144481"
   }];
   const customIntersectPoints = [{
-    slot: 10786486,
-    id: "45902417345d8fe88a6e19ba116d50ca899e3f57587f5279b23baa06463af6c7"
+    slot: process.env.SLOT,
+    id: process.env.BLOCK_HASH
   }];
   console.log("Last Intersection Points: ", intersectionPoints);
 
   client.once('open', () => {
     console.log("connected to wsprpc");
     intersectionPoints.length > 0 && wsprpc("findIntersection", { points: intersectionPoints }, "find-intersection");
-    intersectionPoints.length === 0 && wsprpc("findIntersection", { points: defaultIntersectPointsMainnet }, "find-intersection");
+    intersectionPoints.length === 0 && wsprpc("findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : defaultIntersectPointsMainnet }, "find-intersection");
   });
   
   client.on('message', async ( msg: any ) => {
