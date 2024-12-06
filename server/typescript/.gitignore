@@ -1,4 +1,4 @@
 node_modules
 build
 .env
-**/indexer.db
+src/indexer/indexer.db

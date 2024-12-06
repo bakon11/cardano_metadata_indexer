@@ -6,7 +6,9 @@ const indexerdb = "./src/indexer/indexer.db";
 console.log("indexerdb: ", indexerdb);
 
 console.log("web socket: ", process.env.OGMIOS_WS);
-const client = new WebSocket( process.env.OGMIOS_WS as string);
+const client = new WebSocket( process.env.OGMIOS_WS as string, {
+  perMessageDeflate: false
+});
 console.log("client: ", client);
 
 const network = process.env.NETWORK;
