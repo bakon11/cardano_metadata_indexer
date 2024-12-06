@@ -10,9 +10,13 @@ console.log("network: ", network);
 console.log("web socket: ", process.env.OGMIOS_WS);
 const ws = new WebSocket( process.env.OGMIOS_WS as string);
 
+ws.on('open', () => {
+  indexer();
+});
+
 ws.on('message', async ( msg: any ) => {
   const response = JSON.parse(msg);
-  // console.log("response on message:", response);
+  console.log("response on message:", response);
 
   if (response.id === "find-intersection") {
     if (response.error) { throw "Whoops? Last Byron block disappeared?" };
