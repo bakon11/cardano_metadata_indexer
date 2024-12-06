@@ -18,13 +18,13 @@ export async function start() {
           middleware: [],
         } as HTTPServerTransportOptions,
       },
-      {
+      /*{
         type: "WebSocketTransport",
         options: {
           port: process.env.SERVER_WS_PORT || 3331,
           middleware: [],
         } as WebSocketServerTransportOptions,
-      },
+      },*/
     ],
     methodMapping,
   };
