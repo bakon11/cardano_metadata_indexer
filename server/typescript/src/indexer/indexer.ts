@@ -14,6 +14,10 @@ console.log("ws: ", ws);
 const network = process.env.NETWORK;
 console.log("network: ", network);
 
+ws.on('open', () => {
+  console.log("Websocket connected to OGMIOS");
+});
+
 export const runIndexer = async () => {
   console.log("Checking for tables");
   await createTable();
@@ -36,7 +40,6 @@ export const runIndexer = async () => {
   console.log("Last Intersection Points: ", intersectionPoints);
   console.log("use custom: ",  process.env.USECUSTOM);
 
-  
   ws.on('open', () => {
     console.log("Websocket connected to OGMIOS");
   });
