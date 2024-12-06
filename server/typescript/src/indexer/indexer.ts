@@ -17,7 +17,7 @@ ws.on('message', async ( msg: any ) => {
 
 ws.once('open', () => {
   console.log("Websocket connected to OGMIOS");
-  runIndexer();
+  wsprpc("queryNetwork/tip", {}, "tip");
 });
 
 const runIndexer = async () => {
