@@ -5,7 +5,9 @@ import { open } from 'sqlite';
 const indexerdb = "./src/indexer/indexer.db";
 console.log("indexerdb: ", indexerdb);
 
-console.log("web socket: ", process.env.OGMIOS_WS);
+console.log("web socket: ", process.env.OGMIOS_WS, {
+  rejectUnauthorized: false  // This bypasses certificate validation
+});
 const client = new WebSocket(process.env.OGMIOS_WS as string);
 console.log("client: ", client);
 
