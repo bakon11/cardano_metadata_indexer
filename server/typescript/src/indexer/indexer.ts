@@ -9,13 +9,13 @@ console.log("web socket: ", process.env.OGMIOS_WS);
 const ws = new WebSocket( process.env.OGMIOS_WS as string, {
   perMessageDeflate: false
 });
-console.log("ws: ", ws);
 
 const network = process.env.NETWORK;
 console.log("network: ", network);
 
 
 export const runIndexer = async () => {
+  console.log("ws: ", ws);
   console.log("Checking for tables");
   await createTable();
   const intersectionPoints = await getLastIntersectPoints();
