@@ -14,6 +14,7 @@ console.log("ws: ", ws);
 const network = process.env.NETWORK;
 console.log("network: ", network);
 
+
 export const runIndexer = async () => {
   console.log("Checking for tables");
   await createTable();
@@ -77,7 +78,7 @@ export const runIndexer = async () => {
     return(response);
   });
 
-
+  return;
 };
 
 const wsprpc = (method: string, params:object, id: string | number ) => {
