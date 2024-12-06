@@ -13,14 +13,11 @@ console.log("network: ", network);
 
 ws.on('message', async ( msg: any ) => {
   console.log(JSON.parse(msg));
+  runIndexer(ws);
 });
 
-ws.once('open', () => {
-  console.log("Websocket connected to OGMIOS");
-  wsprpc("queryNetwork/tip", {}, "tip");
-});
 
-const runIndexer = async () => {
+const runIndexer = async (ws: any) => {
   console.log("Checking for tables");
   await createTable();
   const intersectionPoints = await getLastIntersectPoints();
@@ -160,5 +157,3 @@ const connectDB = async () => {
     return;
   };
 };
-
-runIndexer();
