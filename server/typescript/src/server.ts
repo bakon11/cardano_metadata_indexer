@@ -8,7 +8,7 @@ import doc from "./openrpc.json";
 
 export async function start() {
   const serverOptions: ServerOptions = {
-    openrpcDocument: await parseOpenRPCDocument(doc as OpenrpcDocument),
+    openrpcDocument: await parseOpenRPCDocument(doc as any),
     transportConfigs: [
       {
         type: "HTTPTransport",
