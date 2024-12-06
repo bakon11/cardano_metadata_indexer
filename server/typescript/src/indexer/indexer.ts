@@ -15,6 +15,10 @@ console.log("network: ", network);
 
 
 export const runIndexer = async () => {
+  const ws = new WebSocket( process.env.OGMIOS_WS as string, {
+    perMessageDeflate: false
+  });
+
   console.log("ws: ", ws);
   console.log("Checking for tables");
   await createTable();
