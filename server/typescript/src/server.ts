@@ -7,6 +7,9 @@ import methodMapping from "./generated-method-mapping";
 import doc from "./openrpc.json";
 import { runIndexer } from "./indexer/indexer";
 
+// Run the indexer
+runIndexer();
+
 export async function start() {
   const serverOptions: ServerOptions = {
     openrpcDocument: await parseOpenRPCDocument(doc as any),
@@ -35,5 +38,3 @@ export async function start() {
   s.start();
   
 };
-
-runIndexer();
