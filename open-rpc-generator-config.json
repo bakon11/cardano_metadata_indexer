@@ -1,0 +1,16 @@
+{
+    "openrpcDocument": "openrpc.json",
+    "outDir": "./",
+    "components": [
+        {
+            "type": "client",
+            "name": "cardano_metadata_indexer_client",
+            "language": "typescript"
+        },
+        {
+            "type": "server",
+            "name": "cardano_metadata_indexer_server",
+            "language": "typescript"
+        }
+    ]
+}
