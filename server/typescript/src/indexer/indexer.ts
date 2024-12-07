@@ -7,11 +7,10 @@ console.log("indexerdb: ", indexerdb);
 const network = process.env.NETWORK;
 console.log("network: ", network);
 
-console.log("web socket: ", process.env.OGMIOS_WS);
-const ws = new WebSocket( process.env.OGMIOS_WS as string);
-
 const indexer = async () => {
-
+  console.log("web socket: ", process.env.OGMIOS_WS);
+  const ws = new WebSocket( process.env.OGMIOS_WS as string);
+  
   console.log("Checking for tables");
   await createTable();
   
