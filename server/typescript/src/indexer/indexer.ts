@@ -113,7 +113,7 @@ const saveMetadata = async (block: Block) => {
           console.log('NFT: ', nft);
           Object.keys(nft['721'].json).map((policyId) => {
             console.log('Policy Id: ', policyId);
-            Object.keys(nft['721'].json[policyId]).map((assetName) => {
+            byteSize(policyId) == 56 && Object.keys(nft['721'].json[policyId]).map((assetName) => {
               const assetInfo = nft['721'].json[policyId][assetName];
               console.log('assetName: ', assetName);
               console.log('assetInfo: ', assetInfo);
@@ -161,3 +161,5 @@ const connectDB = async () => {
     return("Error connecting to db");
   };
 };
+
+const byteSize = (str: string) => new Blob([str]).size;
