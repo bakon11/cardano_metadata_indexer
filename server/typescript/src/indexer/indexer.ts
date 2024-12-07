@@ -7,22 +7,66 @@ console.log("indexerdb: ", indexerdb);
 const network = process.env.NETWORK;
 console.log("network: ", network);
 
-const indexer = async () => {
-  console.log("web socket: ", process.env.OGMIOS_WS);
-  const ws = new WebSocket( process.env.OGMIOS_WS as string);
-  
-  console.log("Checking for tables");
+// WebSocket setup outside of indexer function
+console.log("web socket: ", process.env.OGMIOS_WS);
+const ws = new WebSocket(process.env.OGMIOS_WS as string);
+
+let intersectionPoints: any[] = [];
+
+// WebSocket event handlers
+ws.on('open', async () => {
+  console.log("Websocket connected to OGMIOS starting sync");
+  try {
+    await setupIntersection();
+    wsprpc(ws, "nextBlock", {}, "nextBlock");
+  } catch (error) {
+    console.error("Error during WebSocket connection:", error);
+  }
+});
+
+ws.on('message', async (msg: any) => {
+  try {
+    const response = JSON.parse(msg);
+
+    if (response.id === "find-intersection") {
+      if (response.error) { 
+        throw new Error("Whoops? Last Byron block disappeared?");
+      }
+      wsprpc(ws, "nextBlock", {}, "nextBlock");
+    }
+    
+    if (response.result.direction === "forward") {
+      console.log("Processing slot: ", response.result.block.slot + " of " + response.result.tip.slot);
+      await saveMetadata(response.result.block);
+      wsprpc(ws, "nextBlock", {}, response.id);
+    }
+
+    if (response.result.direction === "backward") {
+      wsprpc(ws, "nextBlock", {}, response.id);
+    }
+  } catch (error) {
+    console.error("Error processing message:", error);
+  }
+});
+
+ws.on('close', () => {
+  console.log("Connection closed");
+});
+
+ws.on('error', (error: any) => {
+  console.log("Connection Error: ", error);
+});
+
+// Helper functions
+const setupIntersection = async () => {
   await createTable();
-  
-  const intersectionPoints = await getLastIntersectPoints();
+  intersectionPoints = await getLastIntersectPoints();
   console.log("Last Intersection Points: ", intersectionPoints);
 
-  //Last Shelley block mainnet
   const defaultIntersectPointsMainnet = [{
     slot: 16588737,
     id: "4e9bbbb67e3ae262133d94c3da5bffce7b1127fc436e7433b87668dba34c354a"
   }];
-  // Last Shelley blockPreprod
   const defaultIntersectPointsPreprod = [{
     slot: 518360,
     id: "f9d8b6c77fedd60c3caf5de0ce63a0aeb9d1753269c9c07503d9aa09d5144481"
@@ -32,99 +76,23 @@ const indexer = async () => {
     id: process.env.BLOCK_HASH
   }];
 
-  ws.on('open', async () => {
-    console.log("Websocket connected to OGMIOS starting sync");
-    try {
-      if (intersectionPoints.length > 0) {
-        await new Promise((resolve, reject) => {
-          wsprpc(ws, "findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : intersectionPoints }, "find-intersection");
-          ws.once('message', (msg: any) => {
-            const response = JSON.parse(msg);
-            if (response.id === "find-intersection" && response.error) {
-              reject("Whoops? Last Byron block disappeared?");
-            } else {
-              resolve(response);
-            }
-          });
-        });
-      } else {
-        await new Promise((resolve, reject) => {
-          const points = process.env.USECUSTOM === "true" ? customIntersectPoints : 
-                         (network === "mainnet" ? defaultIntersectPointsMainnet : defaultIntersectPointsPreprod);
-          wsprpc(ws, "findIntersection", { points }, "find-intersection");
-          ws.once('message', (msg: any) => {
-            const response = JSON.parse(msg);
-            if (response.id === "find-intersection" && response.error) {
-              reject("Whoops? Last Byron block disappeared?");
-            } else {
-              resolve(response);
-            }
-          });
-        });
-      }
-      // After intersection is found, proceed with nextBlock
-      await new Promise((resolve) => {
-        wsprpc(ws, "nextBlock", {}, "nextBlock");
-        ws.once('message', resolve);
-      });
-    } catch (error) {
-      console.error("Error during WebSocket connection:", error);
-    }
-  });
-  
-  ws.on('message', async (msg: any) => {
-    try {
-      const response = JSON.parse(msg);
-  
-      if (response.id === "find-intersection") {
-        if (response.error) { 
-          throw new Error("Whoops? Last Byron block disappeared?");
-        }
-        await new Promise((resolve) => {
-          wsprpc(ws, "nextBlock", {}, "nextBlock");
-          ws.once('message', resolve);
-        });
-      }
-      
-      if (response.result.direction === "forward") {
-        console.log("Processing slot: ", response.result.block.slot + " of " + response.result.tip.slot);
-        await saveMetadata(response.result.block);
-        await new Promise((resolve) => {
-          wsprpc(ws, "nextBlock", {}, response.id);
-          ws.once('message', resolve);
-        });
-      }
-  
-      if (response.result.direction === "backward") {
-        await new Promise((resolve) => {
-          wsprpc(ws, "nextBlock", {}, response.id);
-          ws.once('message', resolve);
-        });
-      }
-    } catch (error) {
-      console.error("Error processing message:", error);
-    }
-  });
-  
-  ws.on('close', async () => {
-    console.log("Connection closed");
-    // Here you might want to perform cleanup operations if needed
-  });
-  
-  ws.on('error', async (error) => {
-    console.log("Connection Error: ", error);
-    // Any recovery or cleanup action here
-  });
+  if (intersectionPoints.length > 0) {
+    wsprpc(ws, "findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : intersectionPoints }, "find-intersection");
+  } else {
+    const points = process.env.USECUSTOM === "true" ? customIntersectPoints : 
+                   (network === "mainnet" ? defaultIntersectPointsMainnet : defaultIntersectPointsPreprod);
+    wsprpc(ws, "findIntersection", { points }, "find-intersection");
+  }
 };
 
-const wsprpc = ( ws: any, method: string, params:object, id: string | number ) => {
+const wsprpc = (ws: any, method: string, params: object, id: string | number) => {
   ws.send(JSON.stringify({
     jsonrpc: "2.0",
     method,
     params,
     id
   }));
-}
+};
 
 type Block = {
   slot: number,
@@ -193,10 +161,3 @@ const connectDB = async () => {
     return("Error connecting to db");
   };
 };
-
-const runIndexer = async () => {
-  await indexer();
-  console.log("Indexer started");
-};
-
-runIndexer();
