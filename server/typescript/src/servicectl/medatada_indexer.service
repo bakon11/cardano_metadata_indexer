@@ -1,0 +1,18 @@
+[Unit]
+Description     = Cardano Metadata Indexer Mainnet
+Requires        = network.target
+
+[Service]
+Type            = simple
+TimeoutStartSec = 10s
+Restart         = always
+RestartSec      = 10
+WorkingDirectory= /home/mandala/git/cardano_metadata_indexer/server/typescript/
+ExecStart       = /home/mandala/.nvm/versions/node/v20.14.0/bin/node --env-file=.env /home/mandala/git/cardano_metadata_indexer/server/typescript/build/index.js
+LimitNOFILE     = 500000
+LimitNPROC      = 500000
+User            = mandala
+Group           = mandala
+
+[Install]
+WantedBy        = default.target%  
