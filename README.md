@@ -1,3 +1,5 @@
+
+![data](https://github.com/user-attachments/assets/b61693db-e44d-4e12-9a2d-b555ccc36525)
 **Cardano Metadata Indexer**
 
 This indexer requires an instance of Ogmios running with Cardano-node. 
@@ -8,7 +10,7 @@ It also includes a small JSON-RPC2.0 API with two methods to fetch assets, `get_
 
 **Why does this exist**
 
-I find that for most DApp projects I don't need much more than kupo and ogmios. However using the two you don't have the easiest way to access NFT metadata based on CIP-25.
+I find that for most DApp projects I don't need much more than kupo(https://github.com/cardanosolutions/kupo) and ogmios(https://github.com/cardanosolutions/ogmios/). However using the two you don't have the easiest way to access NFT metadata based on CIP-25.
 Needing another more complex heavier solution.
 
 This indexer lets you parse and save all metadata from slot of your choosing, it will also pickup last saved slot in case it restarts or crashes.
