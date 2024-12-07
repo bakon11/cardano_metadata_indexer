@@ -16,21 +16,22 @@ Needing another more complex heavier solution.
 This indexer lets you parse and save all metadata from slot of your choosing, it will also pickup last saved slot in case it restarts or crashes.
 
 **How to use it**
-On my todo list is to have a simple config file. 
+Go into `server/typescript/` and create a `.env` file and fill it out:
+```
+OGMIOS_WS="ws://192.168.1.1:1337"
+NETWORK="mainnet"
+SLOT=518360
+BLOCK_HASH="f9d8b6c77fedd60c3caf5de0ce63a0aeb9d1753269c9c07503d9aa09d5144481"
+USECUSTOM="false"
+SERVER_HTTP_PORT=4441
+SERVER_WS_PORT=3331
+```
 
-For right now you can go into `server/typescript/src/indexer.ts` and you'll find the configs at the type.
-
-Update `client` variable at top to your own Ogmios instance.
-Specifying your own starting point using `slot` and `block hash`.
-
-And if you know a little bit of typescript you can also customize it and specify which policy numbers to index, in the future this will be in a config file.
-
-Then run `npm run indexer` from the `server/typescript` directory will start the indexer.
-
-Then run `npm start` to start the JSON-RPC2.0 api server.(Note: read `Whats left` section).
+And if you know a little bit of typescript you can also customize it a bit and specify which policy numbers to index.
+Then run `npm start` from the `server/typescript` directory will start the indexer and the JSON-RPC server api..
 
 **Whats Left**
-config file for easier confiugring of the indexer.
+Documentation for JSON-RPC API to pull data from DB.
 
 **client**
 The client folder is a installable api client for react.
