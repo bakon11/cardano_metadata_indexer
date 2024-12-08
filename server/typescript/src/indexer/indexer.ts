@@ -36,7 +36,11 @@ ws.on('message', async (msg: any) => {
     }
     
     if (response.result.direction === "forward") {
+      const percentLeft = (response.result.tip.slot - response.result.block.slot) / response.result.tip.slot;
+      const slotsLeft = response.result.tip.slot - response.result.block.slot;
       console.log("Processing slot: ", response.result.block.slot + " of " + response.result.tip.slot);
+      console.log("Sync progress: ", Math.round(percentLeft * 100) + "%");
+      console.log("Left to sync: ", slotsLeft + " slots");
       await saveMetadata(response.result.block);
       wsprpc(ws, "nextBlock", {}, response.id);
     }
@@ -108,17 +112,17 @@ const saveMetadata = async (block: Block) => {
       if (tx.metadata && tx.metadata.labels && tx.metadata.labels['721']) {
         console.log("parsing tx for metadata");
         // console.log(JSON.stringify(tx.metadata));
-        if ( tx.metadata.labels['721'] &&  tx.metadata.labels['721'].json) {
+        if ( tx.metadata.labels['721'] && tx.metadata.labels['721'].json) {
           const nft = tx.metadata.labels;
           console.log('NFT: ', nft);
           Object.keys(nft['721'].json).map((policyId) => {
             console.log('Policy Id: ', policyId);
-            byteSize(policyId) == 56 && Object.keys(nft['721'].json[policyId]).map((assetName) => {
+            byteSize(policyId) == 56 && Object.keys(nft['721'].json[policyId]).map( async (assetName) => {
               const assetInfo = nft['721'].json[policyId][assetName];
               console.log('assetName: ', assetName);
               console.log('assetInfo: ', assetInfo);
               // Insert into database
-              db.run(SQL, [block.slot, block.id, block.era, policyId, assetName, JSON.stringify(assetInfo)]);
+              await db.run(SQL, [block.slot, block.id, block.era, policyId, assetName, JSON.stringify(assetInfo)]);
             });
           });
         }
