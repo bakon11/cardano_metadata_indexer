@@ -109,7 +109,7 @@ const saveMetadata = async ( block: Block, response: any ) => {
         // console.log(JSON.stringify(tx.metadata));
         if ( tx.metadata.labels['721'] && tx.metadata.labels['721'].json) {
           const nft = tx.metadata.labels;
-          console.log('NFT: ', nft);
+         //  console.log('NFT: ', nft);
           Object.keys(nft['721'].json).map((policyId) => {
             console.log('Policy Id: ', policyId);
             byteSize(policyId) == 56 && Object.keys(nft['721'].json[policyId]).map( async (assetName) => {
@@ -154,9 +154,9 @@ const displayStatus = async ( response: any ) => {
   const slotsLeft = response.result.tip.slot - response.result.block.slot;
   console.log("Processing slot: ", `%c${ response.result.block.slot + " of " + response.result.tip.slot}`, `color: "green""; font-weight: bold`);//`%c${ response.result.block.slot + " of " + response.result.tip.slot}`, `color: "green""; font-weight: bold`
   console.log('\n');
-  console.log("Sync progress: ",`%c${ Math.round(percentLeft * 100) + "%"}`, `color: "green; font-weight: bold`);
+  console.log("Sync progress: ", Math.round(percentLeft * 100) + "%");//`%c${ Math.round(percentLeft * 100) + "%")}`, `color: "green""; font-weight: bold`
   console.log('\n');
-  console.log("Left to sync: ", `%c${slotsLeft + " slots"}`, `color: "green""; font-weight: bold` );
+  console.log("Left to sync: ", );//`%c${slotsLeft + " slots"}`, `color: "green""; font-weight: bold`
 };
 
 const connectDB = async () => {
