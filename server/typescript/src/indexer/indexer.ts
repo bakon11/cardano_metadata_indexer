@@ -36,12 +36,7 @@ ws.on('message', async (msg: any) => {
     }
     
     if (response.result.direction === "forward") {
-      const percentLeft = (response.result.tip.slot - response.result.block.slot) / response.result.tip.slot;
-      const slotsLeft = response.result.tip.slot - response.result.block.slot;
-      console.log("Processing slot: ", response.result.block.slot + " of " + response.result.tip.slot);
-      console.log("Sync progress: ", Math.round(percentLeft * 100) + "%");
-      console.log("Left to sync: ", slotsLeft + " slots");
-      await saveMetadata(response.result.block);
+      await saveMetadata(response.result.block, response);
       wsprpc(ws, "nextBlock", {}, response.id);
     }
 
@@ -104,7 +99,7 @@ type Block = {
   era: string,
   transactions: Array<any>
 };
-const saveMetadata = async (block: Block) => {
+const saveMetadata = async ( block: Block, response: any ) => {
   const db: any = await connectDB();
   const SQL = `INSERT INTO metadata_${network} ( slot, block_hash, era, policy_id, asset_name, metadata ) VALUES ( ?, ?, ?, ?, ?, ? )`;
   if (block.transactions && block.transactions.length > 0) {
@@ -120,7 +115,7 @@ const saveMetadata = async (block: Block) => {
             byteSize(policyId) == 56 && Object.keys(nft['721'].json[policyId]).map( async (assetName) => {
               const assetInfo = nft['721'].json[policyId][assetName];
               console.log('assetName: ', assetName);
-              console.log('assetInfo: ', assetInfo);
+              // console.log('assetInfo: ', assetInfo);
               // Insert into database
               await db.run(SQL, [block.slot, block.id, block.era, policyId, assetName, JSON.stringify(assetInfo)]);
             });
@@ -129,6 +124,7 @@ const saveMetadata = async (block: Block) => {
       }
     }));
   }
+  displayStatus( response );
   await db.close();
 };
 
@@ -151,6 +147,16 @@ const createTable = async () => {
   const SQL = `CREATE TABLE IF NOT EXISTS metadata_${network} ( id INTEGER PRIMARY KEY AUTOINCREMENT, slot INTEGER, block_hash TEXT, era TEXT, policy_id TEXT, asset_name TEXT, metadata TEXT )`;
   await db.run(SQL);
   await db.close();
+};
+
+const displayStatus = async ( response: any ) => {
+  const percentLeft = (response.result.tip.slot - response.result.block.slot) / response.result.tip.slot;
+  const slotsLeft = response.result.tip.slot - response.result.block.slot;
+  console.log("Processing slot: ", `%c${ response.result.block.slot + " of " + response.result.tip.slot}`, `color: "green""; font-weight: bold`);//`%c${ response.result.block.slot + " of " + response.result.tip.slot}`, `color: "green""; font-weight: bold`
+  console.log('\n');
+  console.log("Sync progress: ",`%c${ Math.round(percentLeft * 100) + "%"}`, `color: "green; font-weight: bold`);
+  console.log('\n');
+  console.log("Left to sync: ", `%c${slotsLeft + " slots"}`, `color: "green""; font-weight: bold` );
 };
 
 const connectDB = async () => {
