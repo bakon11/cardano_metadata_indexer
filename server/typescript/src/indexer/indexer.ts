@@ -115,7 +115,7 @@ const saveMetadata = async ( block: Block, response: any ) => {
             // console.log('Policy Id: ', policyId);
             byteSize(policyId) == 56 && Object.keys(nft['721'].json[policyId]).map( async (assetName) => {
               const assetInfo = nft['721'].json[policyId][assetName];
-              nftStats = `Policy Id: ${policyId}, Asset Name: ${assetName}, Asset Info: ${JSON.stringify(assetInfo)}`
+              nftStats = `Policy Id: ${policyId}, Asset Name: ${assetName}`
               // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
               // console.log('assetInfo: ', assetInfo);
               // Insert into database
