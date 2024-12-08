@@ -152,12 +152,8 @@ const createTable = async () => {
 const displayStatus = async ( response: any ) => {
   const percentLeft = (response.result.tip.slot - response.result.block.slot) / response.result.tip.slot;
   const slotsLeft = response.result.tip.slot - response.result.block.slot;
-  console.clear();
-  console.log("Processing slot: ", response.result.block.slot + " of " + response.result.tip.slot);
-  console.log('\n');
-  console.log("Sync progress: ", Math.round(percentLeft * 100) + "%");
-  console.log('\n');
-  console.log("Left to sync: ", slotsLeft + " slots");
+  //console.clear();
+  console.log("Processing slot: ", response.result.block.slot + " of " + response.result.tip.slot, "Sync progress: ", Math.round(percentLeft * 100) + "%", "Left to sync: ", slotsLeft + " slots");
 };
 
 const connectDB = async () => {
