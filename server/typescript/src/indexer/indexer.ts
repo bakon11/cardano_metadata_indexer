@@ -102,19 +102,21 @@ type Block = {
 const saveMetadata = async ( block: Block, response: any ) => {
   const db: any = await connectDB();
   const SQL = `INSERT INTO metadata_${network} ( slot, block_hash, era, policy_id, asset_name, metadata ) VALUES ( ?, ?, ?, ?, ?, ? )`;
+  let nftStats: any;
   if (block.transactions && block.transactions.length > 0) {
     await Promise.all(block.transactions.map(async (tx: any) => {
       if (tx.metadata && tx.metadata.labels && tx.metadata.labels['721']) {
-        console.log("parsing tx for metadata");
+        // console.log("parsing tx for metadata");
         // console.log(JSON.stringify(tx.metadata));
         if ( tx.metadata.labels['721'] && tx.metadata.labels['721'].json) {
           const nft = tx.metadata.labels;
          //  console.log('NFT: ', nft);
           Object.keys(nft['721'].json).map((policyId) => {
-            console.log('Policy Id: ', policyId);
+            // console.log('Policy Id: ', policyId);
             byteSize(policyId) == 56 && Object.keys(nft['721'].json[policyId]).map( async (assetName) => {
               const assetInfo = nft['721'].json[policyId][assetName];
-              console.log('assetName: ', assetName);
+              nftStats = `Policy Id: ${policyId}, Asset Name: ${assetName}, Asset Info: ${JSON.stringify(assetInfo)}`
+              // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
               // console.log('assetInfo: ', assetInfo);
               // Insert into database
               await db.run(SQL, [block.slot, block.id, block.era, policyId, assetName, JSON.stringify(assetInfo)]);
@@ -124,7 +126,7 @@ const saveMetadata = async ( block: Block, response: any ) => {
       }
     }));
   }
-  displayStatus( response );
+  displayStatus( response, nftStats );
   await db.close();
 };
 
@@ -149,11 +151,12 @@ const createTable = async () => {
   await db.close();
 };
 
-const displayStatus = async ( response: any ) => {
+const displayStatus = async ( response: any, nftStats: any ) => {
   const percentLeft = (response.result.tip.slot - response.result.block.slot) / response.result.tip.slot;
+  const percentDone = 1 - percentLeft;
   const slotsLeft = response.result.tip.slot - response.result.block.slot;
   //console.clear();
-  console.log("Processing slot: ", response.result.block.slot + " of " + response.result.tip.slot, "Sync progress: ", Math.round(percentLeft * 100) + "%", "Left to sync: ", slotsLeft + " slots");
+  console.log("Slot: ", response.result.block.slot + " of " + response.result.tip.slot, "Sync progress: ", Math.round(percentDone * 100) + "% done", slotsLeft + "slots left", "NFT: ", nftStats);
 };
 
 const connectDB = async () => {
