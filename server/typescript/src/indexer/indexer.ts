@@ -125,7 +125,6 @@ const saveMetadata = async ( block: Block, response: any ) => {
           });
         };
       };
-
       if (tx.metadata && tx.metadata.labels && tx.metadata.labels['20']) {
         // console.log("parsing tx for metadata");
         // console.log(JSON.stringify(tx.metadata));
@@ -144,11 +143,10 @@ const saveMetadata = async ( block: Block, response: any ) => {
             });
           });
         }
-        displayStatus( response, nftStats721, nftStats20 );        
       };
     }));
   };
-
+  displayStatus( response, nftStats721, nftStats20 );
   await db.close();
   return null;
 };
