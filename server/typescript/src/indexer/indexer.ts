@@ -102,7 +102,8 @@ type Block = {
 const saveMetadata = async ( block: Block, response: any ) => {
   const db: any = await connectDB();
   const SQL = `INSERT INTO metadata_${network} ( slot, block_hash, era, policy_id, asset_name, metadata ) VALUES ( ?, ?, ?, ?, ?, ? )`;
-  let nftStats: any;
+  let nftStats721: any;
+  let nftStats20: any;
   if (block.transactions && block.transactions.length > 0) {
     await Promise.all(block.transactions.map(async (tx: any) => {
       if (tx.metadata && tx.metadata.labels && tx.metadata.labels['721']) {
@@ -115,7 +116,7 @@ const saveMetadata = async ( block: Block, response: any ) => {
             // console.log('Policy Id: ', policyId);
             byteSize(policyId) == 56 && Object.keys(nft['721'].json[policyId]).map( async (assetName) => {
               const assetInfo = nft['721'].json[policyId][assetName];
-              nftStats = `Policy Id: ${policyId}, Asset Name: ${assetName}`
+              nftStats721 = `Policy Id: ${policyId}, Asset Name: ${assetName}`
               // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
               // console.log('assetInfo: ', assetInfo);
               // Insert into database
@@ -123,7 +124,6 @@ const saveMetadata = async ( block: Block, response: any ) => {
             });
           });
         };
-        displayStatus( response, nftStats );
       };
 
       if (tx.metadata && tx.metadata.labels && tx.metadata.labels['20']) {
@@ -136,7 +136,7 @@ const saveMetadata = async ( block: Block, response: any ) => {
             // console.log('Policy Id: ', policyId);
             byteSize(policyId) == 56 && Object.keys(ft['20'].json[policyId]).map( async (assetName) => {
               const assetInfo = ft['20'].json[policyId][assetName];
-              nftStats = `Policy Id: ${policyId}, Asset Name: ${assetName}`
+              nftStats20 = `Policy Id: ${policyId}, Asset Name: ${assetName}`
               // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
               // console.log('assetInfo: ', assetInfo);
               // Insert into database
@@ -144,7 +144,7 @@ const saveMetadata = async ( block: Block, response: any ) => {
             });
           });
         }
-        displayStatus( response, nftStats );        
+        displayStatus( response, nftStats721, nftStats20 );        
       };
     }));
   };
@@ -177,12 +177,12 @@ const createTable = async () => {
 
 const indexTable = async () => {}
 
-const displayStatus = async ( response: any, nftStats: any ) => {
+const displayStatus = async ( response: any,  nftStats721: any, nftStats20: any ) => {
   const percentLeft = (response.result.tip.slot - response.result.block.slot) / response.result.tip.slot;
   const percentDone = 1 - percentLeft;
   const slotsLeft = response.result.tip.slot - response.result.block.slot;
   //console.clear();
-  console.log("Slot: ", response.result.block.slot + " of " + response.result.tip.slot, "Sync progress: ", Math.round(percentDone * 100) + "% done", slotsLeft + " slots left ", " ", nftStats, displayTime());
+  console.log("Slot: ", response.result.block.slot + " of " + response.result.tip.slot, "Sync progress: ", Math.round(percentDone * 100) + "% done", slotsLeft + " slots left ", " ", "Label 721: ", nftStats721, "label 20: ", nftStats20, " ", displayTime());
 };
 
 const startTime = process.hrtime();
