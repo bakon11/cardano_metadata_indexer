@@ -12,7 +12,7 @@ const get_by_policy_id: GetByPolicyId = (policy_id) => {
 
 const get_by_policy_id_db = async (policy_id: string) => {
   const db: any = await connectDB();
-  const SQL = "SELECT * FROM metadata WHERE policy_id = ?";
+  const SQL = "SELECT * FROM metadata_mainnet WHERE policy_id = ?";
   const rows = await db.all(SQL, [policy_id]);
   await db.close();
   return rows;
