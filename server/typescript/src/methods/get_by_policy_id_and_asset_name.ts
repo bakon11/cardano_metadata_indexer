@@ -11,7 +11,7 @@ const get_by_policy_id_and_asset_name: GetByPolicyIdAndAssetName = (policy_id, a
 
 const get_by_policy_id_and_asset_name_db = async (policy_id: string, asset_name:string) => {
   const db: any = await connectDB();
-  const SQL = "SELECT * FROM metadata WHERE policy_id = ?";
+  const SQL = `SELECT * FROM metadata_${process.env.NETWORK} WHERE policy_id = ?`;
   const rows = await db.all(SQL, [policy_id]);
   await db.close();
   return rows;

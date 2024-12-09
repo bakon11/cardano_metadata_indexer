@@ -11,6 +11,9 @@
       "description": "",
       "params": [
         {
+          "$ref": "#/components/contentDescriptors/network"
+        },
+        {
           "$ref": "#/components/contentDescriptors/policy_id"
         }
       ],
@@ -26,6 +29,9 @@
       "name": "get_by_policy_id_and_asset_name",
       "description": "",
       "params": [
+        {
+          "$ref": "#/components/contentDescriptors/network"
+        },
         {
           "$ref": "#/components/contentDescriptors/policy_id"
         },
@@ -44,6 +50,15 @@
   ],
   "components": {
     "contentDescriptors": {
+      "network": {
+        "name": "network",
+        "description": "Cardano network",
+        "required": true,
+        "schema": {
+          "title": "network",
+          "type": "string"
+        }
+      },
       "policy_id": {
         "name": "policy_id",
         "description": "Assets policy id",

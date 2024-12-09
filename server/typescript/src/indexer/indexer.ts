@@ -119,15 +119,38 @@ const saveMetadata = async ( block: Block, response: any ) => {
               // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
               // console.log('assetInfo: ', assetInfo);
               // Insert into database
-              await db.run(SQL, [block.slot, block.id, block.era, policyId, assetName, JSON.stringify(assetInfo)]);
+              await db.run(SQL, [block.slot, block.id, block.era, "721",policyId, assetName, JSON.stringify(assetInfo)]);
+            });
+          });
+        };
+        displayStatus( response, nftStats );
+      };
+
+      if (tx.metadata && tx.metadata.labels && tx.metadata.labels['20']) {
+        // console.log("parsing tx for metadata");
+        // console.log(JSON.stringify(tx.metadata));
+        if ( tx.metadata.labels['20'] && tx.metadata.labels['20'].json) {
+          const ft = tx.metadata.labels;
+         //  console.log('FT: ', ft);
+          Object.keys(ft['20'].json).map((policyId) => {
+            // console.log('Policy Id: ', policyId);
+            byteSize(policyId) == 56 && Object.keys(ft['20'].json[policyId]).map( async (assetName) => {
+              const assetInfo = ft['20'].json[policyId][assetName];
+              nftStats = `Policy Id: ${policyId}, Asset Name: ${assetName}`
+              // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
+              // console.log('assetInfo: ', assetInfo);
+              // Insert into database
+              await db.run(SQL, [block.slot, block.id, block.era, "20", policyId, assetName, JSON.stringify(assetInfo)]);
             });
           });
         }
-      }
+        displayStatus( response, nftStats );        
+      };
     }));
-  }
-  displayStatus( response, nftStats );
+  };
+
   await db.close();
+  return null;
 };
 
 const getLastIntersectPoints = async () => {
@@ -149,6 +172,7 @@ const createTable = async () => {
   const SQL = `CREATE TABLE IF NOT EXISTS metadata_${network} ( id INTEGER PRIMARY KEY AUTOINCREMENT, slot INTEGER, block_hash TEXT, era TEXT, policy_id TEXT, asset_name TEXT, metadata TEXT )`;
   await db.run(SQL);
   await db.close();
+  return null;
 };
 
 const indexTable = async () => {}
