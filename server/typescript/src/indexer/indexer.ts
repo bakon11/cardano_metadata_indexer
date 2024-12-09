@@ -151,12 +151,14 @@ const createTable = async () => {
   await db.close();
 };
 
+const indexTable = async () => {}
+
 const displayStatus = async ( response: any, nftStats: any ) => {
   const percentLeft = (response.result.tip.slot - response.result.block.slot) / response.result.tip.slot;
   const percentDone = 1 - percentLeft;
   const slotsLeft = response.result.tip.slot - response.result.block.slot;
   //console.clear();
-  console.log("Slot: ", response.result.block.slot + " of " + response.result.tip.slot, "Sync progress: ", Math.round(percentDone * 100) + "% done", slotsLeft + "slots left", "NFT: ", nftStats);
+  console.log("Slot: ", response.result.block.slot + " of " + response.result.tip.slot, "Sync progress: ", Math.round(percentDone * 100) + "% done", slotsLeft + " slots left ", " ", nftStats);
 };
 
 const connectDB = async () => {
