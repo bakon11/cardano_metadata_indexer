@@ -182,8 +182,27 @@ const displayStatus = async ( response: any, nftStats: any ) => {
   const percentDone = 1 - percentLeft;
   const slotsLeft = response.result.tip.slot - response.result.block.slot;
   //console.clear();
-  console.log("Slot: ", response.result.block.slot + " of " + response.result.tip.slot, "Sync progress: ", Math.round(percentDone * 100) + "% done", slotsLeft + " slots left ", " ", nftStats);
+  console.log("Slot: ", response.result.block.slot + " of " + response.result.tip.slot, "Sync progress: ", Math.round(percentDone * 100) + "% done", slotsLeft + " slots left ", " ", nftStats, displayTime());
 };
+
+const startTime = process.hrtime();
+
+const getElapsedTime = () => {
+    const elapsed = process.hrtime(startTime);
+    const seconds = elapsed[0];
+    const milliseconds = Math.floor(elapsed[1] / 1e6); // Convert nanoseconds to milliseconds
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+}
+
+const displayTime = () => {
+    const elapsedTime = getElapsedTime();
+    return(` Running time: ${elapsedTime}`);
+}
 
 const connectDB = async () => {
   try{
