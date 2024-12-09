@@ -180,7 +180,7 @@ const displayStatus = async ( response: any,  nftStats721: any, nftStats20: any 
   const percentDone = 1 - percentLeft;
   const slotsLeft = response.result.tip.slot - response.result.block.slot;
   //console.clear();
-  console.log("Slot: ", response.result.block.slot + " of " + response.result.tip.slot, "Sync progress: ", Math.round(percentDone * 100) + "% done", slotsLeft + " slots left ", " ", "Label 721: ", nftStats721, "label 20: ", nftStats20, " ", displayTime());
+  console.log("Slot: ", response.result.block.slot + " of " + response.result.tip.slot, "Sync progress: ", Math.round(percentDone * 100) + "% done", slotsLeft + " slots left ", " ", " Label 721: ", nftStats721, " label 20: ", nftStats20, " ", displayTime());
 };
 
 const startTime = process.hrtime();
