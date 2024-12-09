@@ -4,6 +4,7 @@ import { open } from 'sqlite';
 const indexerdb = "./src/indexer/indexer.db";
 
 const get_by_policy_id: GetByPolicyId = (policy_id) => {
+  console.log("fetching policy_id: ", policy_id);
   return Promise.resolve(
     get_by_policy_id_db(policy_id)
   );
