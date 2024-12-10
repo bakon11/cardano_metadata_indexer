@@ -121,7 +121,8 @@ const saveMetadata = async ( block: Block, response: any ) => {
               // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
               // console.log('assetInfo: ', assetInfo);
               // Insert into database
-              await db.run(SQL, [block.slot, block.id, block.era, "721", policyId, assetName, JSON.stringify(assetInfo)]);
+              // await db.run(SQL, [block.slot, block.id, block.era, "721", policyId, assetName, JSON.stringify(assetInfo)]);
+              await dbSave(block, "721", policyId, assetName, JSON.stringify(assetInfo));
             });
           });
         };
@@ -140,7 +141,8 @@ const saveMetadata = async ( block: Block, response: any ) => {
               // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
               // console.log('assetInfo: ', assetInfo);
               // Insert into database
-              await db.run(SQL, [block.slot, block.id, block.era, "20", policyId, assetName, JSON.stringify(assetInfo)]);
+              // await db.run(SQL, [block.slot, block.id, block.era, "20", policyId, assetName, JSON.stringify(assetInfo)]);
+              await dbSave(block, "20", policyId, assetName, JSON.stringify(assetInfo));
             });
           });
         }
@@ -202,7 +204,7 @@ const getElapsedTime = () => {
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = seconds % 60;
 
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
 }
 
 const displayTime = () => {
@@ -210,12 +212,29 @@ const displayTime = () => {
     return(`Elapsed: ${elapsedTime}`);
 }
 
+const dbSave = async (block: any, label: string, policyId: string, assetName: string, metadata: string ) => {
+  const db: any = await connectDB();
+  const SQL = `INSERT INTO metadata_${network} ( slot, block_hash, era, label, policy_id, asset_name, metadata ) VALUES ( ?, ?, ?, ?, ?, ?, ? )`;
+  try {
+    await db.run(SQL, [block.slot, block.id, block.era, label, policyId, assetName, metadata]);
+    await db.close();
+    return(void 0);
+  }catch(error){
+    console.error("Error saving to db", error);
+    return("Error saving to db");
+  };
+};
+
 const connectDB = async () => {
   try{
     const db = await open({
       filename: indexerdb,
       driver: sqlite3.Database
     });
+
+    await db.exec('PRAGMA journal_mode = WAL;');
+
+    console.log('WAL mode enabled:', await db.get('PRAGMA journal_mode;'));
     return db;
   }catch(error){
     console.error("Error connecting to db", error);
