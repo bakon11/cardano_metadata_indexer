@@ -218,8 +218,8 @@ const displayStatus = async ( response: any, NFTstats: string ) => {
   const slotsLeft = response.result.tip.slot - response.result.block.slot;
   //console.clear();
   console.log(
-    `Slot: ${pc.greenBright(response.result.block.slot)} of ${pc.greenBright(response.result.tip.slot)} | Sync progress: ${pc.yellowBright(Math.round(percentDone * 100))}${pc.yellowBright("% done")} | Slots left: ${pc.blueBright(slotsLeft)} |
-     ${NFTstats} |
+    `Slot: ${pc.greenBright(response.result.block.slot)} of ${pc.greenBright(response.result.tip.slot)} | Sync progress: ${pc.yellowBright(Math.round(percentDone * 100))}${pc.yellowBright("% done")} | Slots left: ${pc.blueBright(slotsLeft)}
+     ${NFTstats}
      ${displayTime()}`
   );
 };
@@ -248,9 +248,7 @@ const setupDatabase = async () => {
 const dbSave = async (block: Block, label: string, policyId: string, assetName: string, metadata: string): Promise<void | string> => {
   try {
     const SQL = `INSERT INTO metadata_${network} (slot, block_hash, era, label, policy_id, asset_name, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-    await Promise.resolve(
-      db.run(SQL, [block.slot, block.id, block.era, label, policyId, assetName, metadata])
-    );
+    await Promise.resolve( db.run(SQL, [block.slot, block.id, block.era, label, policyId, assetName, metadata]));
     return(void 0);
   }catch(error){
     console.error('DB error save:', error);
