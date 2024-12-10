@@ -168,7 +168,7 @@ const getLastIntersectPoints = async () => {
 
 const createTable = async () => {
   const db: any = await connectDB();
-  const SQL = `CREATE TABLE IF NOT EXISTS metadata_${network} ( id INTEGER PRIMARY KEY AUTOINCREMENT, slot INTEGER, block_hash TEXT, era TEXT, policy_id TEXT, asset_name TEXT, metadata TEXT )`;
+  const SQL = `CREATE TABLE IF NOT EXISTS metadata_${network} ( id INTEGER PRIMARY KEY AUTOINCREMENT, slot INTEGER, block_hash VARCHAR, era VARCHAR, label VARCHAR, policy_id VARCHAR, asset_name VARCHAR, metadata TEXT )`;
   await db.run(SQL);
   await db.close();
   return null;
