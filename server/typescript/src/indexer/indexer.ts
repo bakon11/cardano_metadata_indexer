@@ -3,6 +3,8 @@ import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import pc from "picocolors"
 
+const startTime = process.hrtime();
+
 const indexerdb = "./src/indexer/indexer.db";
 console.log("indexerdb: ", indexerdb);
 const network = process.env.NETWORK;
@@ -182,7 +184,7 @@ const displayStatus = async ( response: any,  nftStats721: any, nftStats20: any 
 };
 
 const getElapsedTime = () => {
-  const startTime = process.hrtime();
+  
   const elapsed = process.hrtime(startTime);
   const seconds = elapsed[0];
   const milliseconds = Math.floor(elapsed[1] / 1e6); // Convert nanoseconds to milliseconds
