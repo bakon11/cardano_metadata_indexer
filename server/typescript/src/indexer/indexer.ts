@@ -13,7 +13,7 @@ console.log("network: ", network);
 // Initialize database connection once
 let db: any;
 
-async function initializeDB() {
+const initializeDB = async () => {
   try {
     db = await open({
       filename: indexerdb,
@@ -28,6 +28,12 @@ async function initializeDB() {
     process.exit(1); // Exit with an error code if DB connection fails at startup
   }
 }
+// Call initializeDB and setupDatabase before even opening WS connection
+initializeDB().then(() => setupDatabase()).catch(error => {
+  console.error("Failed to initialize database:", error);
+  process.exit(1);
+});
+
 // WebSocket setup outside of indexer function
 console.log("web socket: ", process.env.OGMIOS_WS);
 const ws = new WebSocket(process.env.OGMIOS_WS as string);
@@ -75,10 +81,6 @@ ws.on('error', (error: any) => {
   console.log("Connection Error: ", error);
 });
 
-const setupDatabase = async () => {
-  await createTable();
-  await indexTable(); // Assuming this is defined elsewhere
-};
 const wsprpc = (ws: any, method: string, params: object, id: string | number) => {
   ws.send(JSON.stringify({
     jsonrpc: "2.0",
@@ -87,12 +89,6 @@ const wsprpc = (ws: any, method: string, params: object, id: string | number) =>
     id
   }));
 };
-
-// Call initializeDB and setupDatabase at the start of your script
-initializeDB().then(() => setupDatabase()).catch(error => {
-  console.error("Failed to initialize database:", error);
-  process.exit(1);
-});
 
 // Check for any last Slots/Blocks in DB and setup intersection
 const setupIntersection = async () => {
@@ -129,7 +125,6 @@ type Block = {
 };
 
 const saveMetadata = async ( block: Block, response: any ) => {
-  const db: any = await connectDB();
   let NFTstats: string = "";
   if (block.transactions && block.transactions.length > 0) {
     await Promise.all(block.transactions.map(async (tx: any) => {
@@ -169,48 +164,48 @@ const saveMetadata = async ( block: Block, response: any ) => {
   };
   return null;
 };
-      /* Commenting this out to test a more dynamic metadata detect and label */
-      /*if (tx.metadata && tx.metadata.labels && tx.metadata.labels['721']) {
-        // console.log("parsing tx for metadata");
-        // console.log(JSON.stringify(tx.metadata));
-        if ( tx.metadata.labels['721'] && tx.metadata.labels['721'].json) {
-          const nft = tx.metadata.labels;
-         //  console.log('NFT: ', nft);
-          Object.keys(nft['721'].json).map((policyId) => {
-            // console.log('Policy Id: ', policyId);
-            byteSize(policyId) == 56 && Object.keys(nft['721'].json[policyId]).map( async (assetName) => {
-              const assetInfo = nft['721'].json[policyId][assetName];
-              nftStats721 = `Policy Id: ${policyId}, Asset Name: ${assetName}`
-              // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
-              // console.log('assetInfo: ', assetInfo);
-              // Insert into database
-              // await db.run(SQL, [block.slot, block.id, block.era, "721", policyId, assetName, JSON.stringify(assetInfo)]);
-              await dbSave(block, "721", policyId, assetName, JSON.stringify(assetInfo));
-            });
-          });
-        };
-      };
-      if (tx.metadata && tx.metadata.labels && tx.metadata.labels['20']) {
-        // console.log("parsing tx for metadata");
-        // console.log(JSON.stringify(tx.metadata));
-        if ( tx.metadata.labels['20'] && tx.metadata.labels['20'].json) {
-          const ft = tx.metadata.labels;
-         //  console.log('FT: ', ft);
-          Object.keys(ft['20'].json).map((policyId) => {
-            // console.log('Policy Id: ', policyId);
-            byteSize(policyId) == 56 && Object.keys(ft['20'].json[policyId]).map( async (assetName) => {
-              const assetInfo = ft['20'].json[policyId][assetName];
-              nftStats20 = `Policy Id: ${policyId}, Asset Name: ${assetName}`
-              // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
-              // console.log('assetInfo: ', assetInfo);
-              // Insert into database
-              // await db.run(SQL, [block.slot, block.id, block.era, "20", policyId, assetName, JSON.stringify(assetInfo)]);
-              await dbSave(block, "20", policyId, assetName, JSON.stringify(assetInfo));
-            });
-          });
-        }
-      };
-      */
+/* Commenting this out to test a more dynamic metadata detect and label */
+/*if (tx.metadata && tx.metadata.labels && tx.metadata.labels['721']) {
+  // console.log("parsing tx for metadata");
+  // console.log(JSON.stringify(tx.metadata));
+  if ( tx.metadata.labels['721'] && tx.metadata.labels['721'].json) {
+    const nft = tx.metadata.labels;
+    //  console.log('NFT: ', nft);
+    Object.keys(nft['721'].json).map((policyId) => {
+      // console.log('Policy Id: ', policyId);
+      byteSize(policyId) == 56 && Object.keys(nft['721'].json[policyId]).map( async (assetName) => {
+        const assetInfo = nft['721'].json[policyId][assetName];
+        nftStats721 = `Policy Id: ${policyId}, Asset Name: ${assetName}`
+        // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
+        // console.log('assetInfo: ', assetInfo);
+        // Insert into database
+        // await db.run(SQL, [block.slot, block.id, block.era, "721", policyId, assetName, JSON.stringify(assetInfo)]);
+        await dbSave(block, "721", policyId, assetName, JSON.stringify(assetInfo));
+      });
+    });
+  };
+};
+if (tx.metadata && tx.metadata.labels && tx.metadata.labels['20']) {
+  // console.log("parsing tx for metadata");
+  // console.log(JSON.stringify(tx.metadata));
+  if ( tx.metadata.labels['20'] && tx.metadata.labels['20'].json) {
+    const ft = tx.metadata.labels;
+    //  console.log('FT: ', ft);
+    Object.keys(ft['20'].json).map((policyId) => {
+      // console.log('Policy Id: ', policyId);
+      byteSize(policyId) == 56 && Object.keys(ft['20'].json[policyId]).map( async (assetName) => {
+        const assetInfo = ft['20'].json[policyId][assetName];
+        nftStats20 = `Policy Id: ${policyId}, Asset Name: ${assetName}`
+        // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
+        // console.log('assetInfo: ', assetInfo);
+        // Insert into database
+        // await db.run(SQL, [block.slot, block.id, block.era, "20", policyId, assetName, JSON.stringify(assetInfo)]);
+        await dbSave(block, "20", policyId, assetName, JSON.stringify(assetInfo));
+      });
+    });
+  }
+};
+*/
 const getLastIntersectPoints = async () => {
   const db: any = await connectDB();
   const SQL = `SELECT slot, block_hash FROM metadata_${network} ORDER BY slot DESC LIMIT 100`;
@@ -253,19 +248,9 @@ const displayTime = () => {
 };
 
 /*DB FUNCTIONS */
-const connectDB = async () => {
-  try{
-    const db = await open({
-      filename: indexerdb,
-      driver: sqlite3.Database
-    });
-    db.configure('busyTimeout', 5000);
-    db.exec('PRAGMA journal_mode = WAL');
-    return db;
-  }catch(error){
-    console.error("DB error con:", error);
-    process.exit(1); // Exit with an error code
-  };
+const setupDatabase = async () => {
+  await createTable();
+  await indexTable(); // Assuming this is defined elsewhere
 };
 
 const dbSave = async (block: Block, label: string, policyId: string, assetName: string, metadata: string): Promise<void | string> => {
