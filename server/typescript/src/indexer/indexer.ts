@@ -182,8 +182,12 @@ const displayStatus = async ( response: any,  nftStats721: any, nftStats20: any 
   const slotsLeft = response.result.tip.slot - response.result.block.slot;
   //console.clear();
   console.log(
-    `Slot: , ${pc.greenBright(response.result.block.slot)} of ${pc.greenBright(response.result.tip.slot)} Sync progress: ${pc.yellowBright(Math.round(percentDone * 100))}${pc.yellowBright("% done")} | 
-     Slots left: ${pc.blueBright(slotsLeft)} | Label 721: ${pc.magentaBright(nftStats721)} | Label 20: ${pc.cyanBright(nftStats20)} | ${displayTime()}`
+    `Slot: ${pc.greenBright(response.result.block.slot)} of ${pc.greenBright(response.result.tip.slot)} |
+     Sync progress: ${pc.yellowBright(Math.round(percentDone * 100))}${pc.yellowBright("% done")} | 
+     Slots left: ${pc.blueBright(slotsLeft)} | 
+     Label 721: ${pc.magentaBright(nftStats721)} | 
+     Label 20: ${pc.redBright(nftStats20)} | 
+     ${displayTime()}`
   );
 };
 
@@ -203,7 +207,7 @@ const getElapsedTime = () => {
 
 const displayTime = () => {
     const elapsedTime = getElapsedTime();
-    return(` Running time: ${elapsedTime}`);
+    return(`Elapsed: ${elapsedTime}`);
 }
 
 const connectDB = async () => {
