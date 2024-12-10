@@ -101,7 +101,7 @@ type Block = {
 };
 const saveMetadata = async ( block: Block, response: any ) => {
   const db: any = await connectDB();
-  const SQL = `INSERT INTO metadata_${network} ( slot, block_hash, era, policy_id, asset_name, metadata ) VALUES ( ?, ?, ?, ?, ?, ? )`;
+  const SQL = `INSERT INTO metadata_${network} ( slot, block_hash, era, label, policy_id, asset_name, metadata ) VALUES ( ?, ?, ?, ?, ?, ?, ? )`;
   let nftStats721: any;
   let nftStats20: any;
   if (block.transactions && block.transactions.length > 0) {
@@ -120,7 +120,7 @@ const saveMetadata = async ( block: Block, response: any ) => {
               // console.log('Policy Id: ', policyId, 'assetName: ', assetName);
               // console.log('assetInfo: ', assetInfo);
               // Insert into database
-              await db.run(SQL, [block.slot, block.id, block.era, "721",policyId, assetName, JSON.stringify(assetInfo)]);
+              await db.run(SQL, [block.slot, block.id, block.era, "721", policyId, assetName, JSON.stringify(assetInfo)]);
             });
           });
         };
