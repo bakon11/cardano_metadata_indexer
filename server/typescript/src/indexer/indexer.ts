@@ -4,9 +4,6 @@ import { open } from 'sqlite';
 import pc from "picocolors"
 const startTime = process.hrtime();
 
-let label20Count: number = 0;
-let label721Count: number = 0;
-
 const indexerdb = "./src/indexer/indexer.db";
 console.log("indexerdb: ", indexerdb);
 const network = process.env.NETWORK;
@@ -140,7 +137,7 @@ const saveMetadata = async ( block: Block, response: any ) => {
                 return Object.keys(assets.json[policyId]).reduce((acc3, assetName) => {
                   const assetInfo = assets.json[policyId][assetName];
                   type === '721' ? label721Count++ : label20Count++;
-                  NFTstats = `Label: ${pc.redBright(type)} Policy Id: ${pc.magentaBright(policyId)} Asset Name: ${pc.magentaBright(assetName)} | \n "721": ${pc.redBright(label721Count)} "20": ${pc.redBright(label20Count)} |`;
+                  NFTstats = `Label: ${pc.redBright(type)} Policy Id: ${pc.magentaBright(policyId)} Asset Name: ${pc.magentaBright(assetName)}`;
                   // Push the promise returned by dbSave, which matches Promise<void | string>
                   acc3.push(dbSave(block, type, policyId, assetName, JSON.stringify(assetInfo)));
                   return acc3;
