@@ -231,10 +231,8 @@ const connectDB = async () => {
       filename: indexerdb,
       driver: sqlite3.Database
     });
-
     await db.exec('PRAGMA journal_mode = WAL;');
-
-    console.log('WAL mode enabled:', await db.get('PRAGMA journal_mode;'));
+    // console.log('WAL mode enabled:', await db.get('PRAGMA journal_mode;'));
     return db;
   }catch(error){
     console.error("Error connecting to db", error);
