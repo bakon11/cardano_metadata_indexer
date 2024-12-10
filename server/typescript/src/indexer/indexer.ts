@@ -207,10 +207,8 @@ if (tx.metadata && tx.metadata.labels && tx.metadata.labels['20']) {
 };
 */
 const getLastIntersectPoints = async () => {
-  const db: any = await connectDB();
   const SQL = `SELECT slot, block_hash FROM metadata_${network} ORDER BY slot DESC LIMIT 100`;
   const rows = await db.all(SQL);
-  await db.close();
   let lastIntersectPoints: any = [];
   await rows.map((row: any) => {
     lastIntersectPoints.push({ slot: row.slot, id: row.block_hash });
@@ -282,14 +280,10 @@ const indexTable = async () => {
     await db.run(SQL2);
     await db.run(SQL3);
     await db.exec('COMMIT;');
-    await db.close();
   } catch (error) {
     await db.exec('ROLLBACK;');
     console.error('Error creating indexes:', error);
-    if (db) {
-      await db.close();
-    }
-  }
+  };
 };
 
 // When your script is about to exit
