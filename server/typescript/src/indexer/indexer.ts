@@ -212,53 +212,33 @@ const displayTime = () => {
     return(`Elapsed: ${elapsedTime}`);
 }
 
-// Database connection function that returns a Promise
- const connectDB = async (): Promise<sqlite3.Database> =>{
-  return new Promise((resolve, reject) => {
-    const db = new sqlite3.Database(indexerdb, (err: Error | null) => {
-      if (err) {
-        reject(err);
-      } else {
-        // Set busy timeout to 5 seconds
-        db.configure('busyTimeout', 5000);
-        db.exec('PRAGMA journal_mode = WAL');
-        resolve(db);
-      }
+const connectDB = async () => {
+  try{
+    const db = await open({
+      filename: indexerdb,
+      driver: sqlite3.Database
     });
-  });
+    db.configure('busyTimeout', 5000);
+    db.exec('PRAGMA journal_mode = WAL');
+    return db;
+  }catch(error){
+    console.error("Error connecting to db", error);
+    process.exit(1); // Exit with an error code
+  };
 };
 
 const dbSave = async (block: Block, label: string, policyId: string, assetName: string, metadata: string): Promise<void | string> => {
-  let db: sqlite3.Database | null = null;
   try {
-    db = await connectDB();
+    const db: any = await connectDB();
     const SQL = `INSERT INTO metadata_${network} (slot, block_hash, era, label, policy_id, asset_name, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-    await new Promise((resolve, reject) => {
-      db!.run(SQL, [block.slot, block.id, block.era, label, policyId, assetName, metadata], function(err: Error | null) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(void 0);
-        }
-      });
-    });
-    return;
-  } catch (error) {
-    console.error("Error saving to db", error);
-    return "Error saving to db";
-  } finally {
-    if (db) {
-      await new Promise((resolve, reject) => {
-        db!.close((err: Error | null) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(void 0);
-          }
-        });
-      });
-    }
-  }
+    await Promise.resolve(
+      db.run(SQL, [block.slot, block.id, block.era, label, policyId, assetName, metadata])
+    );
+    return(void 0);
+  }catch(error){
+    console.error('An error occurred:', error);
+    process.exit(1); // Exit with an error code
+  }; 
 };
 
 /*Old way for DB functions delete after testing new way*/
@@ -273,23 +253,6 @@ const dbSave = async (block: any, label: string, policyId: string, assetName: st
   }catch(error){
     console.error("Error saving to db", error);
     return("Error saving to db");
-  };
-};
-
-const connectDB = async () => {
-  try{
-    const db = await open({
-      filename: indexerdb,
-      driver: sqlite3.Database
-    });
-
-    await db.exec('PRAGMA journal_mode = WAL;');
-
-    
-    return db;
-  }catch(error){
-    console.error("Error connecting to db", error);
-    return("Error connecting to db");
   };
 };
 */
