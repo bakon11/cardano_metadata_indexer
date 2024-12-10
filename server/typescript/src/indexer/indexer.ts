@@ -4,6 +4,7 @@ import { open } from 'sqlite';
 import pc from "picocolors"
 
 const startTime = process.hrtime();
+const elapsed = process.hrtime(startTime);
 
 const indexerdb = "./src/indexer/indexer.db";
 console.log("indexerdb: ", indexerdb);
@@ -126,6 +127,8 @@ type Block = {
 
 const saveMetadata = async ( block: Block, response: any ) => {
   let NFTstats: string = "";
+  let label20Count: number = 0;
+  let label721Count: number = 0;
   if (block.transactions && block.transactions.length > 0) {
     await Promise.all(block.transactions.map(async (tx: any) => {
       if (tx.metadata && tx.metadata.labels && (tx.metadata.labels['721'] || tx.metadata.labels['20'])) {
@@ -137,11 +140,8 @@ const saveMetadata = async ( block: Block, response: any ) => {
               if (byteSize(policyId) === 56) {
                 return Object.keys(assets.json[policyId]).reduce((acc3, assetName) => {
                   const assetInfo = assets.json[policyId][assetName];
-                  /*
-                    Label 721: ${pc.magentaBright(nftStats721)} | 
-                    Label 20: ${pc.redBright(nftStats20)} | 
-                  */
-                  NFTstats = `Label: ${pc.redBright(type)} Policy Id: ${pc.magentaBright(policyId)}, Asset Name: ${pc.magentaBright(assetName)}`;
+                  type === '721' ? label721Count++ : label20Count++;
+                  NFTstats = `Label: ${pc.redBright(type)} Policy Id: ${pc.magentaBright(policyId)} Asset Name: ${pc.magentaBright(assetName)} "721": ${pc.redBright(label721Count)} "20": ${pc.redBright(label20Count)}`;
                   // Push the promise returned by dbSave, which matches Promise<void | string>
                   acc3.push(dbSave(block, type, policyId, assetName, JSON.stringify(assetInfo)));
                   return acc3;
@@ -222,15 +222,12 @@ const displayStatus = async ( response: any, NFTstats: string ) => {
   const slotsLeft = response.result.tip.slot - response.result.block.slot;
   //console.clear();
   console.log(
-    `Slot: ${pc.greenBright(response.result.block.slot)} of ${pc.greenBright(response.result.tip.slot)} |
-     Sync progress: ${pc.yellowBright(Math.round(percentDone * 100))}${pc.yellowBright("% done")} | 
-     Slots left: ${pc.blueBright(slotsLeft)} |
+    `Slot: ${pc.greenBright(response.result.block.slot)} of ${pc.greenBright(response.result.tip.slot)} | Sync progress: ${pc.yellowBright(Math.round(percentDone * 100))}${pc.yellowBright("% done")} | Slots left: ${pc.blueBright(slotsLeft)} |
      ${NFTstats} |
      ${displayTime()}`
   );
 };
 
-const elapsed = process.hrtime(startTime);
 const getElapsedTime = () => {
   const seconds = elapsed[0];
   const milliseconds = Math.floor(elapsed[1] / 1e6); // Convert nanoseconds to milliseconds
