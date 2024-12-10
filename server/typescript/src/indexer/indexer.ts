@@ -2,9 +2,10 @@ import WebSocket from 'ws';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import pc from "picocolors"
-
 const startTime = process.hrtime();
-const elapsed = process.hrtime(startTime);
+
+let label20Count: number = 0;
+let label721Count: number = 0;
 
 const indexerdb = "./src/indexer/indexer.db";
 console.log("indexerdb: ", indexerdb);
@@ -127,8 +128,6 @@ type Block = {
 
 const saveMetadata = async ( block: Block, response: any ) => {
   let NFTstats: string = "";
-  let label20Count: number = 0;
-  let label721Count: number = 0;
   if (block.transactions && block.transactions.length > 0) {
     await Promise.all(block.transactions.map(async (tx: any) => {
       if (tx.metadata && tx.metadata.labels && (tx.metadata.labels['721'] || tx.metadata.labels['20'])) {
@@ -141,7 +140,7 @@ const saveMetadata = async ( block: Block, response: any ) => {
                 return Object.keys(assets.json[policyId]).reduce((acc3, assetName) => {
                   const assetInfo = assets.json[policyId][assetName];
                   type === '721' ? label721Count++ : label20Count++;
-                  NFTstats = `Label: ${pc.redBright(type)} Policy Id: ${pc.magentaBright(policyId)} Asset Name: ${pc.magentaBright(assetName)} "721": ${pc.redBright(label721Count)} "20": ${pc.redBright(label20Count)}`;
+                  NFTstats = `Label: ${pc.redBright(type)} Policy Id: ${pc.magentaBright(policyId)} Asset Name: ${pc.magentaBright(assetName)} | \n "721": ${pc.redBright(label721Count)} "20": ${pc.redBright(label20Count)} |`;
                   // Push the promise returned by dbSave, which matches Promise<void | string>
                   acc3.push(dbSave(block, type, policyId, assetName, JSON.stringify(assetInfo)));
                   return acc3;
@@ -229,6 +228,7 @@ const displayStatus = async ( response: any, NFTstats: string ) => {
 };
 
 const getElapsedTime = () => {
+  const elapsed = process.hrtime(startTime);
   const seconds = elapsed[0];
   const milliseconds = Math.floor(elapsed[1] / 1e6); // Convert nanoseconds to milliseconds
   const hours = Math.floor(seconds / 3600);
