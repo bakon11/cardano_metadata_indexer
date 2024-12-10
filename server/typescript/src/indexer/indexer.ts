@@ -248,7 +248,7 @@ const displayTime = () => {
 /*DB FUNCTIONS */
 const setupDatabase = async () => {
   await createTable();
-  await indexTable(); // Assuming this is defined elsewhere
+  process.env.INDEX_DB === "true" && indexTable(); // Assuming this is defined elsewhere
 };
 
 const dbSave = async (block: Block, label: string, policyId: string, assetName: string, metadata: string): Promise<void | string> => {
@@ -312,6 +312,4 @@ process.on('uncaughtException', (err) => {
     process.exit(1);
   }
 });
-
-process.env.INDEX_DB === "true" && indexTable();
 const byteSize = (str: string) => new Blob([str]).size;
