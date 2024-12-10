@@ -237,9 +237,9 @@ const createTable = async () => {
 
 const indexTable = async () => {
   const db = await connectDB();
-  const SQL = `CREATE INDEX idx_policy_id ON metadata_mainnet(policy_id);`;
-  const SQL2 = `CREATE INDEX idx_asset_name ON metadata_mainnet(asset_name);`;
-  const SQL3 = `CREATE INDEX idx_policy_asset ON metadata_mainnet(policy_id, asset_name);`;
+  const SQL = `CREATE INDEX idx_policy_id ON metadata_${network}(policy_id);`;
+  const SQL2 = `CREATE INDEX idx_asset_name ON metadata_${network}(asset_name);`;
+  const SQL3 = `CREATE INDEX idx_policy_asset ON metadata_${network}(policy_id, asset_name);`;
   try {
     await db.exec('BEGIN TRANSACTION;');
     await db.run(SQL);
