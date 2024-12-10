@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import pc from "picocolors"
 
 const indexerdb = "./src/indexer/indexer.db";
 console.log("indexerdb: ", indexerdb);
@@ -180,7 +181,10 @@ const displayStatus = async ( response: any,  nftStats721: any, nftStats20: any 
   const percentDone = 1 - percentLeft;
   const slotsLeft = response.result.tip.slot - response.result.block.slot;
   //console.clear();
-  console.log("Slot: ", response.result.block.slot + " of " + response.result.tip.slot, "Sync progress: ", Math.round(percentDone * 100) + "% done", slotsLeft + " slots left ", " ", " Label 721: ", nftStats721, " label 20: ", nftStats20, " ", displayTime());
+  console.log(
+    `Slot: , ${pc.greenBright(response.result.block.slot)} of ${pc.greenBright(response.result.tip.slot)} Sync progress: ${pc.yellowBright(Math.round(percentDone * 100))}${pc.yellowBright("% done")} | 
+     Slots left: ${pc.blueBright(slotsLeft)} | Label 721: ${pc.magentaBright(nftStats721)} | Label 20: ${pc.cyanBright(nftStats20)} | ${displayTime()}`
+  );
 };
 
 const startTime = process.hrtime();
@@ -194,7 +198,7 @@ const getElapsedTime = () => {
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = seconds % 60;
 
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(2, '0')}`;
 }
 
 const displayTime = () => {
