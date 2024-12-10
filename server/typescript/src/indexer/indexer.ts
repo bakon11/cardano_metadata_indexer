@@ -136,7 +136,6 @@ const saveMetadata = async ( block: Block, response: any ) => {
               if (byteSize(policyId) === 56) {
                 return Object.keys(assets.json[policyId]).reduce((acc3, assetName) => {
                   const assetInfo = assets.json[policyId][assetName];
-                  type === '721' ? label721Count++ : label20Count++;
                   NFTstats = `Label: ${pc.redBright(type)} Policy Id: ${pc.magentaBright(policyId)} Asset Name: ${pc.magentaBright(assetName)}`;
                   // Push the promise returned by dbSave, which matches Promise<void | string>
                   acc3.push(dbSave(block, type, policyId, assetName, JSON.stringify(assetInfo)));
