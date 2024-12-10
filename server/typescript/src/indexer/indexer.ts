@@ -57,7 +57,6 @@ ws.on('error', (error: any) => {
   console.log("Connection Error: ", error);
 });
 
-// Helper functions
 const setupIntersection = async () => {
   await createTable();
   intersectionPoints = await getLastIntersectPoints();
@@ -164,19 +163,8 @@ const getLastIntersectPoints = async () => {
   await rows.map((row: any) => {
     lastIntersectPoints.push({ slot: row.slot, id: row.block_hash });
   });
-
   return(lastIntersectPoints);
 };
-
-const createTable = async () => {
-  const db: any = await connectDB();
-  const SQL = `CREATE TABLE IF NOT EXISTS metadata_${network} ( id INTEGER PRIMARY KEY AUTOINCREMENT, slot INTEGER, block_hash VARCHAR, era VARCHAR, label VARCHAR, policy_id VARCHAR, asset_name VARCHAR, metadata TEXT )`;
-  await db.run(SQL);
-  await db.close();
-  return null;
-};
-
-const indexTable = async () => {}
 
 const displayStatus = async ( response: any,  nftStats721: any, nftStats20: any ) => {
   const percentLeft = (response.result.tip.slot - response.result.block.slot) / response.result.tip.slot;
@@ -193,25 +181,23 @@ const displayStatus = async ( response: any,  nftStats721: any, nftStats20: any 
   );
 };
 
-const startTime = process.hrtime();
-
 const getElapsedTime = () => {
-    const elapsed = process.hrtime(startTime);
-    const seconds = elapsed[0];
-    const milliseconds = Math.floor(elapsed[1] / 1e6); // Convert nanoseconds to milliseconds
-
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
-}
+  const startTime = process.hrtime();
+  const elapsed = process.hrtime(startTime);
+  const seconds = elapsed[0];
+  const milliseconds = Math.floor(elapsed[1] / 1e6); // Convert nanoseconds to milliseconds
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+};
 
 const displayTime = () => {
-    const elapsedTime = getElapsedTime();
-    return(`Elapsed: ${elapsedTime}`);
-}
+  const elapsedTime = getElapsedTime();
+  return(`Elapsed: ${elapsedTime}`);
+};
 
+/*DB FUNCTIONS */
 const connectDB = async () => {
   try{
     const db = await open({
@@ -222,7 +208,7 @@ const connectDB = async () => {
     db.exec('PRAGMA journal_mode = WAL');
     return db;
   }catch(error){
-    console.error("Error connecting to db", error);
+    console.error("DB error con:", error);
     process.exit(1); // Exit with an error code
   };
 };
@@ -236,26 +222,38 @@ const dbSave = async (block: Block, label: string, policyId: string, assetName: 
     );
     return(void 0);
   }catch(error){
-    console.error('An error occurred:', error);
+    console.error('DB error save:', error);
     process.exit(1); // Exit with an error code
   }; 
 };
 
-/*Old way for DB functions delete after testing new way*/
-/*
-const dbSave = async (block: any, label: string, policyId: string, assetName: string, metadata: string ) => {
+const createTable = async () => {
   const db: any = await connectDB();
-  const SQL = `INSERT INTO metadata_${network} ( slot, block_hash, era, label, policy_id, asset_name, metadata ) VALUES ( ?, ?, ?, ?, ?, ?, ? )`;
-  try {
-    await db.run(SQL, [block.slot, block.id, block.era, label, policyId, assetName, metadata]);
-    await db.close();
-    return(void 0);
-  }catch(error){
-    console.error("Error saving to db", error);
-    return("Error saving to db");
-  };
+  const SQL = `CREATE TABLE IF NOT EXISTS metadata_${network} ( id INTEGER PRIMARY KEY AUTOINCREMENT, slot INTEGER, block_hash VARCHAR, era VARCHAR, label VARCHAR, policy_id VARCHAR, asset_name VARCHAR, metadata TEXT )`;
+  await db.run(SQL);
+  await db.close();
+  return null;
 };
-*/
 
-
+const indexTable = async () => {
+  const db = await connectDB();
+  const SQL = `CREATE INDEX idx_policy_id ON metadata_mainnet(policy_id);`;
+  const SQL2 = `CREATE INDEX idx_asset_name ON metadata_mainnet(asset_name);`;
+  const SQL3 = `CREATE INDEX idx_policy_asset ON metadata_mainnet(policy_id, asset_name);`;
+  try {
+    await db.exec('BEGIN TRANSACTION;');
+    await db.run(SQL);
+    await db.run(SQL2);
+    await db.run(SQL3);
+    await db.exec('COMMIT;');
+    await db.close();
+  } catch (error) {
+    await db.exec('ROLLBACK;');
+    console.error('Error creating indexes:', error);
+    if (db) {
+      await db.close();
+    }
+  }
+};
+process.env.INDEX_DB === "true" && indexTable();
 const byteSize = (str: string) => new Blob([str]).size;
