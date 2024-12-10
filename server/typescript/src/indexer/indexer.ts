@@ -10,11 +10,27 @@ console.log("indexerdb: ", indexerdb);
 const network = process.env.NETWORK;
 console.log("network: ", network);
 
+// Initialize database connection once
+let db: any;
+
+async function initializeDB() {
+  try {
+    db = await open({
+      filename: indexerdb,
+      driver: sqlite3.Database
+    });
+    db.configure('busyTimeout', 5000);
+    db.exec('PRAGMA journal_mode = WAL');
+    console.log("Database connection established.");
+    return db;
+  } catch (error) {
+    console.error("DB error con:", error);
+    process.exit(1); // Exit with an error code if DB connection fails at startup
+  }
+}
 // WebSocket setup outside of indexer function
 console.log("web socket: ", process.env.OGMIOS_WS);
 const ws = new WebSocket(process.env.OGMIOS_WS as string);
-
-let intersectionPoints: any[] = [];
 
 // WebSocket event handlers
 ws.on('open', async () => {
@@ -59,9 +75,28 @@ ws.on('error', (error: any) => {
   console.log("Connection Error: ", error);
 });
 
-const setupIntersection = async () => {
+const setupDatabase = async () => {
   await createTable();
-  intersectionPoints = await getLastIntersectPoints();
+  await indexTable(); // Assuming this is defined elsewhere
+};
+const wsprpc = (ws: any, method: string, params: object, id: string | number) => {
+  ws.send(JSON.stringify({
+    jsonrpc: "2.0",
+    method,
+    params,
+    id
+  }));
+};
+
+// Call initializeDB and setupDatabase at the start of your script
+initializeDB().then(() => setupDatabase()).catch(error => {
+  console.error("Failed to initialize database:", error);
+  process.exit(1);
+});
+
+// Check for any last Slots/Blocks in DB and setup intersection
+const setupIntersection = async () => {
+  const intersectionPoints = await getLastIntersectPoints();
   console.log("Last Intersection Points: ", intersectionPoints);
 
   const defaultIntersectPointsMainnet = [{
@@ -86,29 +121,56 @@ const setupIntersection = async () => {
   }
 };
 
-const wsprpc = (ws: any, method: string, params: object, id: string | number) => {
-  ws.send(JSON.stringify({
-    jsonrpc: "2.0",
-    method,
-    params,
-    id
-  }));
-};
-
 type Block = {
   slot: number,
   id: string,
   era: string,
   transactions: Array<any>
 };
+
 const saveMetadata = async ( block: Block, response: any ) => {
   const db: any = await connectDB();
-  const SQL = `INSERT INTO metadata_${network} ( slot, block_hash, era, label, policy_id, asset_name, metadata ) VALUES ( ?, ?, ?, ?, ?, ?, ? )`;
-  let nftStats721: any;
-  let nftStats20: any;
+  let NFTstats: string = "";
   if (block.transactions && block.transactions.length > 0) {
     await Promise.all(block.transactions.map(async (tx: any) => {
-      if (tx.metadata && tx.metadata.labels && tx.metadata.labels['721']) {
+      if (tx.metadata && tx.metadata.labels && (tx.metadata.labels['721'] || tx.metadata.labels['20'])) {
+        const labels = tx.metadata.labels;
+        const savePromises = ['721', '20'].reduce((acc, type) => {
+          if (labels[type] && labels[type].json) {
+            const assets = labels[type];
+            return Object.keys(assets.json).reduce((acc2, policyId) => {
+              if (byteSize(policyId) === 56) {
+                return Object.keys(assets.json[policyId]).reduce((acc3, assetName) => {
+                  const assetInfo = assets.json[policyId][assetName];
+                  /*
+                    Label 721: ${pc.magentaBright(nftStats721)} | 
+                    Label 20: ${pc.redBright(nftStats20)} | 
+                  */
+                  NFTstats = `Label: ${pc.redBright(type)} Policy Id: ${pc.magentaBright(policyId)}, Asset Name: ${pc.magentaBright(assetName)}`;
+                  // Push the promise returned by dbSave, which matches Promise<void | string>
+                  acc3.push(dbSave(block, type, policyId, assetName, JSON.stringify(assetInfo)));
+                  return acc3;
+                }, acc2);
+              }
+              return acc2;
+            }, acc);
+          }
+          return acc;
+        }, [] as Array<Promise<void | string>>);
+        // Wait for all promises to resolve or reject
+        Promise.all(savePromises).then(() => {
+          displayStatus( response, NFTstats );
+        }).catch(error => {
+          console.error("An error occurred:", error);
+          process.exit(1); // Exit with an error code
+        });
+      }
+    }));
+  };
+  return null;
+};
+      /* Commenting this out to test a more dynamic metadata detect and label */
+      /*if (tx.metadata && tx.metadata.labels && tx.metadata.labels['721']) {
         // console.log("parsing tx for metadata");
         // console.log(JSON.stringify(tx.metadata));
         if ( tx.metadata.labels['721'] && tx.metadata.labels['721'].json) {
@@ -148,19 +210,12 @@ const saveMetadata = async ( block: Block, response: any ) => {
           });
         }
       };
-    }));
-  };
-  displayStatus( response, nftStats721, nftStats20 );
-  await db.close();
-  return null;
-};
-
+      */
 const getLastIntersectPoints = async () => {
   const db: any = await connectDB();
   const SQL = `SELECT slot, block_hash FROM metadata_${network} ORDER BY slot DESC LIMIT 100`;
   const rows = await db.all(SQL);
   await db.close();
-
   let lastIntersectPoints: any = [];
   await rows.map((row: any) => {
     lastIntersectPoints.push({ slot: row.slot, id: row.block_hash });
@@ -168,7 +223,7 @@ const getLastIntersectPoints = async () => {
   return(lastIntersectPoints);
 };
 
-const displayStatus = async ( response: any,  nftStats721: any, nftStats20: any ) => {
+const displayStatus = async ( response: any, NFTstats: string ) => {
   const percentLeft = (response.result.tip.slot - response.result.block.slot) / response.result.tip.slot;
   const percentDone = 1 - percentLeft;
   const slotsLeft = response.result.tip.slot - response.result.block.slot;
@@ -176,16 +231,14 @@ const displayStatus = async ( response: any,  nftStats721: any, nftStats20: any 
   console.log(
     `Slot: ${pc.greenBright(response.result.block.slot)} of ${pc.greenBright(response.result.tip.slot)} |
      Sync progress: ${pc.yellowBright(Math.round(percentDone * 100))}${pc.yellowBright("% done")} | 
-     Slots left: ${pc.blueBright(slotsLeft)} | 
-     Label 721: ${pc.magentaBright(nftStats721)} | 
-     Label 20: ${pc.redBright(nftStats20)} | 
+     Slots left: ${pc.blueBright(slotsLeft)} |
+     ${NFTstats} |
      ${displayTime()}`
   );
 };
 
+const elapsed = process.hrtime(startTime);
 const getElapsedTime = () => {
-  
-  const elapsed = process.hrtime(startTime);
   const seconds = elapsed[0];
   const milliseconds = Math.floor(elapsed[1] / 1e6); // Convert nanoseconds to milliseconds
   const hours = Math.floor(seconds / 3600);
@@ -217,7 +270,6 @@ const connectDB = async () => {
 
 const dbSave = async (block: Block, label: string, policyId: string, assetName: string, metadata: string): Promise<void | string> => {
   try {
-    const db: any = await connectDB();
     const SQL = `INSERT INTO metadata_${network} (slot, block_hash, era, label, policy_id, asset_name, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)`;
     await Promise.resolve(
       db.run(SQL, [block.slot, block.id, block.era, label, policyId, assetName, metadata])
@@ -230,15 +282,12 @@ const dbSave = async (block: Block, label: string, policyId: string, assetName: 
 };
 
 const createTable = async () => {
-  const db: any = await connectDB();
   const SQL = `CREATE TABLE IF NOT EXISTS metadata_${network} ( id INTEGER PRIMARY KEY AUTOINCREMENT, slot INTEGER, block_hash VARCHAR, era VARCHAR, label VARCHAR, policy_id VARCHAR, asset_name VARCHAR, metadata TEXT )`;
   await db.run(SQL);
-  await db.close();
   return null;
 };
 
 const indexTable = async () => {
-  const db = await connectDB();
   const SQL = `CREATE INDEX idx_policy_id ON metadata_${network}(policy_id);`;
   const SQL2 = `CREATE INDEX idx_asset_name ON metadata_${network}(asset_name);`;
   const SQL3 = `CREATE INDEX idx_policy_asset ON metadata_${network}(policy_id, asset_name);`;
@@ -257,5 +306,33 @@ const indexTable = async () => {
     }
   }
 };
+
+// When your script is about to exit
+process.on('exit', () => {
+  if (db) {
+    db.close().then(() => {
+      console.log('Database connection closed gracefully.');
+    }).catch((err: any) => {
+      console.error('Error closing database:', err);
+    });
+  }
+});
+
+// Or if you have a specific error that should lead to program termination:
+process.on('uncaughtException', (err) => {
+  console.error('Caught exception:', err);
+  if (db) {
+    db.close().then(() => {
+      console.log('Database closed before program exit due to error.');
+      process.exit(1);
+    }).catch((closeError: any) => {
+      console.error('Failed to close database:', closeError);
+      process.exit(1);
+    });
+  } else {
+    process.exit(1);
+  }
+});
+
 process.env.INDEX_DB === "true" && indexTable();
 const byteSize = (str: string) => new Blob([str]).size;
