@@ -5,7 +5,6 @@ import _ from "lodash";
 import { OpenrpcDocument as OpenRPC, MethodObject, ContentDescriptorObject } from "@open-rpc/meta-schema";
 import { MethodCallValidator, MethodNotFoundError } from "@open-rpc/schema-utils-js";
 
-export type Network = string;
 export type PolicyId = string;
 export type AssetName = string;
 export type StringDoaGddGA = string;
@@ -14,9 +13,9 @@ export type StringDoaGddGA = string;
  * Generated! Represents an alias to any of the provided schemas
  *
  */
-export type AnyOfNetworkPolicyIdNetworkPolicyIdAssetNameStringDoaGddGAStringDoaGddGA = Network | PolicyId | AssetName | StringDoaGddGA;
-export type GetByPolicyId = (network: Network, policy_id: PolicyId) => Promise<StringDoaGddGA>;
-export type GetByPolicyIdAndAssetName = (network: Network, policy_id: PolicyId, asset_name: AssetName) => Promise<StringDoaGddGA>;
+export type AnyOfPolicyIdPolicyIdAssetNameStringDoaGddGAStringDoaGddGA = PolicyId | AssetName | StringDoaGddGA;
+export type GetByPolicyId = (policy_id: PolicyId) => Promise<StringDoaGddGA>;
+export type GetByPolicyIdAndAssetName = (policy_id: PolicyId, asset_name: AssetName) => Promise<StringDoaGddGA>;
 
 export interface Options {
   transport: {
@@ -30,7 +29,7 @@ export interface Options {
 
 export class CardanoMetadataIndexer {
   public rpc: Client;
-  public static openrpcDocument: OpenRPC = {"openrpc":"1.2.6","info":{"title":"cardano_metadata_indexer","version":"1.0.0","description":"This is a simple light weight metadata indexer for Cardano."},"methods":[{"name":"get_by_policy_id","description":"","params":[{"name":"network","description":"Cardano network","required":true,"schema":{"title":"network","type":"string"}},{"name":"policy_id","description":"Assets policy id","required":true,"schema":{"title":"policy_id","type":"string"}}],"result":{"name":"result","description":"","schema":{"type":"string"}}},{"name":"get_by_policy_id_and_asset_name","description":"","params":[{"name":"network","description":"Cardano network","required":true,"schema":{"title":"network","type":"string"}},{"name":"policy_id","description":"Assets policy id","required":true,"schema":{"title":"policy_id","type":"string"}},{"name":"asset_name","description":"Assets name","required":true,"schema":{"title":"asset_name","type":"string"}}],"result":{"name":"result","description":"","schema":{"type":"string"}}}],"components":{"contentDescriptors":{"network":{"name":"network","description":"Cardano network","required":true,"schema":{"title":"network","type":"string"}},"policy_id":{"name":"policy_id","description":"Assets policy id","required":true,"schema":{"title":"policy_id","type":"string"}},"asset_name":{"name":"asset_name","description":"Assets name","required":true,"schema":{"title":"asset_name","type":"string"}}}}} ;
+  public static openrpcDocument: OpenRPC = {"openrpc":"1.2.6","info":{"title":"cardano_metadata_indexer","version":"1.0.0","description":"This is a simple light weight metadata indexer for Cardano."},"methods":[{"name":"get_by_policy_id","description":"","params":[{"name":"policy_id","description":"Assets policy id","required":true,"schema":{"title":"policy_id","type":"string"}}],"result":{"name":"result","description":"","schema":{"type":"string"}}},{"name":"get_by_policy_id_and_asset_name","description":"","params":[{"name":"policy_id","description":"Assets policy id","required":true,"schema":{"title":"policy_id","type":"string"}},{"name":"asset_name","description":"Assets name","required":true,"schema":{"title":"asset_name","type":"string"}}],"result":{"name":"result","description":"","schema":{"type":"string"}}}],"components":{"contentDescriptors":{"network":{"name":"network","description":"Cardano network","required":true,"schema":{"title":"network","type":"string"}},"policy_id":{"name":"policy_id","description":"Assets policy id","required":true,"schema":{"title":"policy_id","type":"string"}},"asset_name":{"name":"asset_name","description":"Assets name","required":true,"schema":{"title":"asset_name","type":"string"}}}}} ;
   public transport: HTTPTransport | WebSocketTransport | PostMessageWindowTransport | PostMessageIframeTransport;
   private validator: MethodCallValidator;
   private timeout: number | undefined;

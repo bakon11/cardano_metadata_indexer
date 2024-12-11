@@ -11,9 +11,6 @@
       "description": "",
       "params": [
         {
-          "$ref": "#/components/contentDescriptors/network"
-        },
-        {
           "$ref": "#/components/contentDescriptors/policy_id"
         }
       ],
@@ -29,9 +26,6 @@
       "name": "get_by_policy_id_and_asset_name",
       "description": "",
       "params": [
-        {
-          "$ref": "#/components/contentDescriptors/network"
-        },
         {
           "$ref": "#/components/contentDescriptors/policy_id"
         },
