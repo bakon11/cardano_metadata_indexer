@@ -204,12 +204,18 @@ if (tx.metadata && tx.metadata.labels && tx.metadata.labels['20']) {
 const getLastIntersectPoints = async () => {
   console.log("Getting last intersection points");
   const SQL = `SELECT slot, block_hash FROM metadata_${network} ORDER BY slot DESC LIMIT 100`;
-  const rows = await db.all(SQL);
-  let lastIntersectPoints: any = [];
-  await rows.map((row: any) => {
-    lastIntersectPoints.push({ slot: row.slot, id: row.block_hash });
-  });
-  return(lastIntersectPoints);
+  try{
+    const rows = await db.all(SQL);
+    let lastIntersectPoints: any = [];
+    await rows.map((row: any) => {
+      lastIntersectPoints.push({ slot: row.slot, id: row.block_hash });
+    });
+    return(lastIntersectPoints);
+  }catch(error){
+    console.error('DB error last:', error);
+    process.exit(1); // Exit with an error code
+  };
+
 };
 
 const displayStatus = async ( response: any, NFTstats: string ) => {
