@@ -202,6 +202,7 @@ if (tx.metadata && tx.metadata.labels && tx.metadata.labels['20']) {
 };
 */
 const getLastIntersectPoints = async () => {
+  console.log("Getting last intersection points");
   const SQL = `SELECT slot, block_hash FROM metadata_${network} ORDER BY slot DESC LIMIT 100`;
   const rows = await db.all(SQL);
   let lastIntersectPoints: any = [];
