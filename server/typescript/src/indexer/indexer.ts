@@ -149,7 +149,7 @@ const saveMetadata = async ( block: Block, response: any ) => {
         }, [] as Array<Promise<void | string>>);
         // Wait for all promises to resolve or reject
         Promise.all(savePromises).then(() => {
-          displayStatus( response, NFTstats );
+          // displayStatus( response, NFTstats );
         }).catch(error => {
           console.error("An error occurred:", error);
           process.exit(1); // Exit with an error code
@@ -157,6 +157,7 @@ const saveMetadata = async ( block: Block, response: any ) => {
       }
     }));
   };
+  displayStatus( response, NFTstats );
   return null;
 };
 /* Commenting this out to test a more dynamic metadata detect and label */
@@ -215,7 +216,6 @@ const getLastIntersectPoints = async () => {
     console.error('DB error last:', error);
     process.exit(1); // Exit with an error code
   };
-
 };
 
 const displayStatus = async ( response: any, NFTstats: string ) => {
