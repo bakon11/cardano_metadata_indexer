@@ -65,6 +65,7 @@ ws.on('message', async (msg: any) => {
     }
 
     if (response.result.direction === "backward") {
+      console.log("Rollback!!!")
       wsprpc(ws, "nextBlock", {}, response.id);
     }
   } catch (error) {
@@ -225,7 +226,7 @@ const displayStatus = async ( response: any, NFTstats: string ) => {
   //console.clear();
   console.log(
     `Slot: ${pc.greenBright(response.result.block.slot)} of ${pc.greenBright(response.result.tip.slot)} | Sync progress: ${pc.yellowBright(Math.round(percentDone * 100))}${pc.yellowBright("% done")} | Slots left: ${pc.blueBright(slotsLeft)}
-     ${NFTstats}
+     ${NFTstats !== "" && NFTstats}
      ${displayTime()}`
   );
 };
