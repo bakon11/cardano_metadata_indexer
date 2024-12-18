@@ -93,7 +93,7 @@ const wsprpc = (ws: any, method: string, params: object, id: string | number) =>
 // Check for any last Slots/Blocks in DB and setup intersection
 const setupIntersection = async () => {
   const intersectionPoints = await getLastIntersectPoints();
-  console.log("Last Intersection Points: ", intersectionPoints);
+  console.log("Last Intersection Points: ", intersectionPoints.length);
 
   const defaultIntersectPointsMainnet = [{
     slot: 16588737,
