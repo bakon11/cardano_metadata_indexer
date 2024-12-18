@@ -106,7 +106,7 @@ const setupIntersection = async () => {
     slot: parseInt(process.env.SLOT as string, 10),
     id: process.env.BLOCK_HASH
   }];
-
+  console.log("Custom Intersection Points: ", customIntersectPoints);
   if (intersectionPoints.length > 0) {
     wsprpc(ws, "findIntersection", { points: process.env.USECUSTOM === "true" ? customIntersectPoints : intersectionPoints }, "find-intersection");
   } else {
